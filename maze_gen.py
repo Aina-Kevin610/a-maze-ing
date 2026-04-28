@@ -22,15 +22,6 @@ class Maze:
             return self.hunt_and_kill()
 
 
-    @staticmethod
-    def dec_to_hex(dec: int, result: str = []) -> str:
-        base = ["0123456789ABCDEF"]
-        if dec >= 16:
-            dec_to_hex(dec // 16, result)       
-        result += base[0][dec % 16]
-        return str(result)
-
-
     def hexa_maze(self, grid) -> list[list[str]]:
         return [[format(grid[row][col], 'X') for row in range(self.width)] for col in range(self.height)]
 
@@ -140,6 +131,8 @@ class Maze:
             f = open(self.output_file, "w")
             for x in grid:
                 f.write(str(x).replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace(" ", "") + "\n")
+            f.write(f"\n{str(self.entry).replace("(", "").replace(")", "").replace("'", "")}")
+            f.write(f"\n{str(self.exit).replace("(", "").replace(")", "").replace("'", "")}")
         except Exception:
             pass
         finally:
