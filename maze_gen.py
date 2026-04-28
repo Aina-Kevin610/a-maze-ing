@@ -32,11 +32,7 @@ class Maze:
 
 
     def hexa_maze(self, grid) -> list[list[str]]:
-        new_grid = []
-        for row in range(self.height):
-            for col in range(self.width):
-                new_grid.append(self.dec_to_hex(grid[row][col]))
-        return new_grid
+        return [[format(grid[row][col], 'X') for row in range(self.width)] for col in range(self.height)]
 
 
     def is_all_visited(self, visited) -> bool:
@@ -135,7 +131,7 @@ class Maze:
             if result is None:
                 break
             x, y = result
-        return grid
+        return self.hexa_maze(grid)
     
 
     def save(self, grid) -> None:
@@ -143,7 +139,7 @@ class Maze:
         try:
             f = open(self.output_file, "w")
             for x in grid:
-                f.write(str(x).replace("[", "").replace("]", "").replace(",", "") + "\n")
+                f.write(str(x).replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace(" ", "") + "\n")
         except Exception:
             pass
         finally:
