@@ -68,7 +68,6 @@ class Maze:
         grid[yn][xn] &= ~opp
         visited[y][x] = True
         visited[yn][xn] = True
-        # self.print_maze(grid, visited)
         return xn, yn
 
 
@@ -87,7 +86,7 @@ class Maze:
         return neighbors
 
 
-    def get_visited_neighbors(self, visited, x, y):   # ← méthode manquante
+    def get_visited_neighbors(self, visited, x, y):
         way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         neighbors = []
         for dx, dy in way:
@@ -115,7 +114,7 @@ class Maze:
                     v_neighbors = self.get_visited_neighbors(visited, j, i)
                     if v_neighbors:
                         xn, yn = random.choice(v_neighbors)
-                        self.remove_wall(grid, visited, j, i, xn, yn)  # connecte !
+                        self.remove_wall(grid, visited, j, i, xn, yn)
                         return j, i   
                 j += 1
             i += 1
@@ -136,10 +135,16 @@ class Maze:
             if result is None:
                 break
             x, y = result
-            grid = self.hexa_maze(grid)
-            for row in grid:
-                print(row)
         return grid
     
+
     def save(self, grid) -> None:
-        print("Saving maze in", self.output_file)
+        print("Saving maze in", self.output_file,"...")
+        try:
+            f = open(self.output_file, "w")
+            for x in grid:
+                f.write(str(x).replace("[", "").replace("]", "").replace(",", "") + "\n")
+        except Exception:
+            pass
+        finally:
+            f.close()
