@@ -80,6 +80,10 @@ def entry_exit(new_content: dict[str, str]) -> dict[str, Any]:
 
 
 def is_valid(final: dict[str, Any]) -> None:
+    algos = [
+        "DFS",
+        "hunt_and_kill"
+    ]
     try:
         str(final["ALGO"])
         int(final["ENTRY"][0])
@@ -93,7 +97,7 @@ def is_valid(final: dict[str, Any]) -> None:
             raise ParseError("FILE OUTPUT's extension must be '.txt' !")
         if final["PERFECT"] != "True" and final["PERFECT"] != "False":
             raise ParseError("PERFECT option must be boolean!")
-        if final["ALGO"] != "DFS":
+        if not final["ALGO"] in algos:
             raise ParseError("Unknown parameter for ALGO!")
         if len(final["ENTRY"]) != 2 or len(final["EXIT"]) != 2:
             raise ParseError("Invalid ENTRY or EXIT parameter!")

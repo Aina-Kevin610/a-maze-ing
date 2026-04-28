@@ -4,4 +4,4 @@ ENTRY=0,1
 EXIT=19,14
 OUTPUT_FILE=maze.txt
 PERFECT=False
-ALGO=DFS
+ALGO=hunt_and_kill

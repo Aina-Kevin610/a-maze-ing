@@ -16,17 +16,8 @@ class Maze:
         return [[15 for _ in range(self.width)] for _ in range(self.height)]
     
     def generate(self) -> None:
-        if self.algo == "DFS":
-            self.dfs()
-
-
-    @staticmethod
-    def bin_to_dec(bin:  int, pow: int = 0, result = 0) -> int:
-            if pow == 4:
-                return result
-            result += (bin % 10) * (2**pow)
-            return bin_to_dec(bin // 10, pow + 1, result)
-    
+        if self.algo == "hunt_and_kill":
+            self.hunt_and_kill()
 
     @staticmethod
     def dec_to_hex(dec: int, result: str = []) -> str:
@@ -47,19 +38,6 @@ class Maze:
 
     def init_visited(self) -> list[list[bool]]:
         return [[False for _ in range(self.width)] for _ in range(self.height)]
-
-    def draw_42(self) -> None:
-        print("42 drawn")
-
-
-    def direction(self) -> int:
-        direction = {
-            "N" : 0b0001,
-            "E" : 0b0010,
-            "S" : 0b0100,
-            "W" : 0b1000
-        }
-        return random.choice(list(direction.values()))
     
 
     def remove_wall(self, grid, visited, x, y, xn, yn):
@@ -95,15 +73,62 @@ class Maze:
         for dx, dy in way:
             xn, yn = dx + x, dy + y
             if 0 <= xn < self.width and 0 <= yn < self.height and not visited[yn][xn]:
-                neighbors.append([xn, yn])
-        return neighbors[0], neighbors[1]
+                neighbors.append((xn, yn))
+        return neighbors
 
 
-    def dfs(self) -> None:
+    def kill(self, grid, visited, x, y):
+        while True:
+            neighbors = self.get_neighbors(visited, x, y)
+            if not neighbors:
+                return x, y
+            xn, yn = random.choice(neighbors)
+            x, y = self.remove_wall(grid, visited, x, y, xn, yn)
+
+
+    def get_visited_neighbors(self, visited, x, y):   # ← méthode manquante
+        way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        neighbors = []
+        for dx, dy in way:
+            xn, yn = dx + x, dy + y
+            if 0 <= xn < self.width and 0 <= yn < self.height and visited[yn][xn]:
+                neighbors.append((xn, yn))
+        return neighbors
+
+
+    def hunt(self, grid, visited):
+        i = 0
+        while i < self.height:
+            j = 0
+            while j < self.width:
+                if not visited[i][j]:
+                    v_neighbors = self.get_visited_neighbors(visited, j, i)
+                    if v_neighbors:
+                        xn, yn = random.choice(v_neighbors)
+                        self.remove_wall(grid, visited, j, i, xn, yn)  # connecte !
+                        return j, i   
+                j += 1
+            i += 1
+        return None
+
+
+    def is_all_visited(self, visited) -> bool:
+        for row in visited:
+            if False in row:
+                return False
+        return True
+
+
+    def hunt_and_kill(self) -> None:
         grid = self.__init_grid()
         visited: list[list[bool]] = self.init_visited()
-        x, y = random.randint(0, self.width), random.randint(0, self.height)
-        while not visited[y - 1][x - 1]:
-            xn, yn = self.get_neighbors(visited, x, y)
-            x, y = self.remove_wall(grid, visited, x, y, xn, yn)
-        print(x, y)
+        x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
+        visited[y][x] = True
+        while not self.is_all_visited(visited):
+            x, y = self.kill(grid, visited, x, y)
+            if self.is_all_visited(visited):
+                break
+            result = self.hunt(grid, visited)
+            if result is None:
+                break
+            x, y = result

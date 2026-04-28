@@ -64,3 +64,16 @@ def hunt_and_kill(self):  # (tu peux garder le nom dfs si tu veux)
             break  # ✅ Plus de cellule non visitée → labyrinthe terminé
 
     self.print_maze(grid, visited)  # Affichage unique à la fin
+
+
+
+
+
+
+
+    def bin_to_dec(bin:  int, pow: int= 0, result = 0) -> int:
+            if pow == 4:
+                return result
+            result += (bin % 10) * (2**pow)
+            return bin_to_dec(bin // 10, pow + 1, result)
+    
