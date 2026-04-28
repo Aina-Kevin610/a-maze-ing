@@ -24,17 +24,19 @@ class Maze:
 
     @staticmethod
     def dec_to_hex(dec: int, result: str = []) -> str:
-        base = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
+        base = ["0123456789ABCDEF"]
         if dec >= 16:
             dec_to_hex(dec // 16, result)       
-        result += base[dec % 16]
+        result += base[0][dec % 16]
         return str(result)
 
 
-    def hexa_maze(self, grid):
+    def hexa_maze(self, grid) -> list[list[str]]:
+        new_grid = []
         for row in range(self.height):
             for col in range(self.width):
-                grid[row][col] = self.dec_to_hex(grid[row][col])
+                new_grid.append(self.dec_to_hex(grid[row][col]))
+        return new_grid
 
 
     def is_all_visited(self, visited) -> bool:
@@ -120,7 +122,8 @@ class Maze:
         return None
 
 
-    def hunt_and_kill(self):
+    def hunt_and_kill(self) -> list[list[str]]:
+        print("=== Hunt and Kill ===")
         grid = self.__init_grid()
         visited = self.init_visited()
         x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
@@ -133,7 +136,10 @@ class Maze:
             if result is None:
                 break
             x, y = result
-        self.hexa_maze(grid)
+            grid = self.hexa_maze(grid)
+            for row in grid:
+                print(row)
         return grid
     
-    
+    def save(self, grid) -> None:
+        print("Saving maze in", self.output_file)
