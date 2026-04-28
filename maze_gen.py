@@ -12,12 +12,15 @@ class Maze:
         self.perfect = config["PERFECT"]
         self.algo = config["ALGO"]
 
+
     def __init_grid(self) -> list[list[int]]:
         return [[15 for _ in range(self.width)] for _ in range(self.height)]
-    
+
+
     def generate(self) -> None:
         if self.algo == "hunt_and_kill":
-            self.hunt_and_kill()
+            return self.hunt_and_kill()
+
 
     @staticmethod
     def dec_to_hex(dec: int, result: str = []) -> str:
@@ -27,13 +30,18 @@ class Maze:
         result += base[dec % 16]
         return str(result)
 
-    def print_maze(self, grid, visited):
-        print("=== MAZE ===")
-        for row in grid:
-            print (row)
-        print("=== VISITED MAZE ===")
+
+    def hexa_maze(self, grid):
+        for row in range(self.height):
+            for col in range(self.width):
+                grid[row][col] = self.dec_to_hex(grid[row][col])
+
+
+    def is_all_visited(self, visited) -> bool:
         for row in visited:
-            print (row)
+            if False in row:
+                return False
+        return True
 
 
     def init_visited(self) -> list[list[bool]]:
@@ -58,21 +66,31 @@ class Maze:
         grid[yn][xn] &= ~opp
         visited[y][x] = True
         visited[yn][xn] = True
-        self.print_maze(grid, visited)
+        # self.print_maze(grid, visited)
         return xn, yn
 
 
     def get_neighbors(self, visited, x, y):
         way = [
-            ( 0, -1),  # Haut
-            ( 1,  0),  # Droite
-            ( 0,  1),  # Bas
-            (-1,  0)   # Gauche
+            ( 0, -1), 
+            ( 1,  0),
+            ( 0,  1),
+            (-1,  0)
         ]
         neighbors = []
         for dx, dy in way:
             xn, yn = dx + x, dy + y
             if 0 <= xn < self.width and 0 <= yn < self.height and not visited[yn][xn]:
+                neighbors.append((xn, yn))
+        return neighbors
+
+
+    def get_visited_neighbors(self, visited, x, y):   # ← méthode manquante
+        way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        neighbors = []
+        for dx, dy in way:
+            xn, yn = dx + x, dy + y
+            if 0 <= xn < self.width and 0 <= yn < self.height and visited[yn][xn]:
                 neighbors.append((xn, yn))
         return neighbors
 
@@ -84,16 +102,6 @@ class Maze:
                 return x, y
             xn, yn = random.choice(neighbors)
             x, y = self.remove_wall(grid, visited, x, y, xn, yn)
-
-
-    def get_visited_neighbors(self, visited, x, y):   # ← méthode manquante
-        way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-        neighbors = []
-        for dx, dy in way:
-            xn, yn = dx + x, dy + y
-            if 0 <= xn < self.width and 0 <= yn < self.height and visited[yn][xn]:
-                neighbors.append((xn, yn))
-        return neighbors
 
 
     def hunt(self, grid, visited):
@@ -112,16 +120,9 @@ class Maze:
         return None
 
 
-    def is_all_visited(self, visited) -> bool:
-        for row in visited:
-            if False in row:
-                return False
-        return True
-
-
-    def hunt_and_kill(self) -> None:
+    def hunt_and_kill(self):
         grid = self.__init_grid()
-        visited: list[list[bool]] = self.init_visited()
+        visited = self.init_visited()
         x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
         visited[y][x] = True
         while not self.is_all_visited(visited):
@@ -132,3 +133,7 @@ class Maze:
             if result is None:
                 break
             x, y = result
+        self.hexa_maze(grid)
+        return grid
+    
+    

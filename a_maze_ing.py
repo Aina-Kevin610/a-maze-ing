@@ -4,4 +4,5 @@ from maze_gen import Maze
 
 if __name__ == "__main__":
     maze = Maze()
-    maze.generate()
+    grid = maze.hunt_and_kill()
+    print(grid)
