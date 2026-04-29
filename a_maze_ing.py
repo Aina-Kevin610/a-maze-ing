@@ -1,6 +1,5 @@
 from maze_gen import Maze
-from render import Drawing
-import random
+from render import DrawingMaze
 import sys
 
 
@@ -20,7 +19,7 @@ def main() -> None:
     maze.save(grid)
     hexa_maze = read_maze()
     hexa_maze = hexa_maze.split("\n")
-    draw = Drawing(maze, hexa_maze, 0xffffffff)
+    draw = DrawingMaze(maze, hexa_maze, 0xffffffff)
     draw.draw_maze()
     draw.m.mlx_loop(draw.mlx)
 

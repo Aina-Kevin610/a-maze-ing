@@ -2,10 +2,10 @@ from mlx import Mlx
 import random
 import sys
 
-class Drawing:
+class DrawingMaze:
     def __init__(self, maze, hexa_maze, color) -> None:
         h_win = 720
-        w_win = 720
+        w_win = 1080
         self.m = Mlx()
         self.mlx = self.m.mlx_init()
         self.win =  self.m.mlx_new_window(self.mlx, w_win, h_win, "A-MAZE-ING !")
@@ -31,6 +31,7 @@ class Drawing:
         ]
         color = random.choice(colors)
         if keycode == 32:
+            print("Changing wall color...")
             self.color = color
             self.draw_maze()
         if keycode == 65307:
