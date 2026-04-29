@@ -1,5 +1,6 @@
 from maze_gen import Maze
 from render import Drawing
+import sys
 
 def read_maze(filename: str = "maze.txt") -> str:
     try:
@@ -7,7 +8,7 @@ def read_maze(filename: str = "maze.txt") -> str:
             return f.read()
     except FileNotFoundError:
         print("Error - OUTPUT_FILE not generated !")
-        return ""
+        sys.exit(0)
 
 
 def main() -> None:

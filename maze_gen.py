@@ -33,24 +33,25 @@ class Maze:
         return True
 
 
-    def init_visited(self) -> list[list[bool]]:
-        return [[False for _ in range(self.width)] for _ in range(self.height)]
+    def __init_visited(self) -> list[list[bool]]:
+        visited = [[False for _ in range(self.width)] for _ in range(self.height)]
+        return visited
     
 
     def remove_wall(self, grid, visited, x, y, xn, yn):
         dx, dy = xn - x, yn - y
         if dx == 1:
-            dir = 0b0010
-            opp = 0b1000
-        elif dx == -1:
-            dir = 0b1000
-            opp = 0b0010
-        elif dy == 1:
             dir = 0b0100
             opp = 0b0001
-        elif dy == -1:
+        elif dx == -1:
             dir = 0b0001
             opp = 0b0100
+        elif dy == 1:
+            dir = 0b0010
+            opp = 0b1000
+        elif dy == -1:
+            dir = 0b1000
+            opp = 0b0010
         grid[y][x] &= ~dir
         grid[yn][xn] &= ~opp
         visited[y][x] = True
@@ -111,7 +112,7 @@ class Maze:
     def hunt_and_kill(self) -> list[list[str]]:
         print("=== Hunt and Kill ===")
         grid = self.__init_grid()
-        visited = self.init_visited()
+        visited = self.__init_visited()
         x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
         visited[y][x] = True
         while not self.is_all_visited(visited):
