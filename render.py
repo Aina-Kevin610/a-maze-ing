@@ -4,7 +4,7 @@ import sys
 class Drawing:
     def __init__(self, maze, color) -> None:
         h_win = 720
-        w_win = 1080
+        w_win = 720
         self.m = Mlx()
         self.mlx = self.m.mlx_init()
         self.win =  self.m.mlx_new_window(self.mlx, w_win, h_win, "A-MAZE-ING !")
@@ -33,6 +33,18 @@ class Drawing:
         self.draw_line_v(x, y, y + self.cell_size_h)
         self.draw_line_v(x + self.cell_size_w, y, y + self.cell_size_h)
 
+
+    def north(self, x, y):
+        self.draw_line_h(x, x + self.cell_size_w, y)
+        
+    def south(self, x, y):
+        self.draw_line_h(x, x + self.cell_size_w, y + self.cell_size_h)
+
+    def east(self, x, y):
+        self.draw_line_v(x + self.cell_size_w, y, y + self.cell_size_h)
+
+    def west(self, x, y):
+        self.draw_line_v(x, y, y + self.cell_size_h)
 
     def draw_grid(self) -> None:
         i = 0
