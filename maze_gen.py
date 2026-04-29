@@ -23,7 +23,7 @@ class Maze:
 
 
     def hexa_maze(self, grid) -> list[list[str]]:
-        return [[format(grid[row][col], 'X') for row in range(self.width)] for col in range(self.height)]
+        return [[format(grid[row][col], 'X') for col in range(self.width)] for row in range(self.height)]
 
 
     def is_all_visited(self, visited) -> bool:
