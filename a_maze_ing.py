@@ -1,6 +1,8 @@
 from maze_gen import Maze
 from render import Drawing
+import random
 import sys
+
 
 def read_maze(filename: str = "maze.txt") -> str:
     try:
@@ -12,6 +14,7 @@ def read_maze(filename: str = "maze.txt") -> str:
 
 
 def main() -> None:
+    
     maze = Maze()
     grid = maze.generate()
     maze.save(grid)

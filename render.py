@@ -1,4 +1,5 @@
 from mlx import Mlx
+import random
 import sys
 
 class Drawing:
@@ -15,7 +16,32 @@ class Drawing:
         self.color = color
         self.maze = maze
         self.hexa_maze = hexa_maze
-        self.m.mlx_hook(self.win, 2, 1, self.exit_win, [self])
+        self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
+
+
+    def handle_keys(self, keycode, params):
+        colors = [
+            0x000000FF,
+            0xFFFFFFFF,
+            0xFF0000FF,
+            0x00FF00FF,
+            0x0000FFFF,
+            0xFFFF00FF,
+            0x00FFFFFF,
+        ]
+        color = random.choice(colors)
+        if keycode == 32:
+            self.color = color
+            self.draw_maze()
+        if keycode == 65307:
+            print("Exited with ESC ...")
+            self.m.mlx_destroy_window(self.mlx, self.win)
+            self.m.mlx_loop_exit(self.mlx)
+        if keycode == 65293:
+            print("Restartint...")
+            self.maze.generate()
+            self.draw_maze()
+        return 0
 
 
     def draw_line_h(self, x0, x1, y) -> None:
@@ -59,16 +85,15 @@ class Drawing:
                 x += self.cell_size_w
             y += self.cell_size_h
             i += 1
+        
 
-
-    def exit_win(self, keycode, params):
-        if keycode == 65307:
-            print("Exited with ESC ...")
-            self.m.mlx_destroy_window(self.mlx, self.win)
-            self.m.mlx_loop_exit(self.mlx)
-        return 0
+    def clear_win(self):
+        for y in range(720):
+            for x in range(720):
+                self.m.mlx_pixel_put(self.mlx, self.win, x, y, 0x000000FF)
     
     def draw_maze(self):
+        self.clear_win()
         x, y = 0, 0
         for i in range(0, self.maze.height):
             x = 0
