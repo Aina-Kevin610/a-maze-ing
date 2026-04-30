@@ -101,6 +101,18 @@ def is_valid(final: dict[str, Any]) -> None:
             raise ParseError("Unknown parameter for ALGO!")
         if len(final["ENTRY"]) != 2 or len(final["EXIT"]) != 2:
             raise ParseError("Invalid ENTRY or EXIT parameter!")
+        if not "ALGO" in final.keys():
+            raise ParseError("Missing mandatory config [ALGO]")
+        if not "HEIGHT" in final.keys():
+            raise ParseError("Missing mandatory config [HEIGHT]")
+        if not "EXIT" in final.keys():
+            raise ParseError("Missing mandatory config [EXIT]")
+        if not "ENTRY" in final.keys():
+            raise ParseError("Missing mandatory config [ENTRY]")
+        if not "PERFECT" in final.keys():
+            raise ParseError("Missing mandatory config [PERFECT]")
+        if not "OUTPUT_FILE" in final.keys():
+            raise ParseError("Missing mandatory config [OUTPUT_FILE]")
     except Exception as e:
         print("Error - ", e)
         os._exit(0)
