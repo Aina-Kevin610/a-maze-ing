@@ -106,7 +106,7 @@ class DrawingMaze:
     
     
     def draw_maze(self):
-        self.clear_image()  # Clear the image before drawing
+        self.clear_image()
         for y in range(self.maze.height):
             for x in range(self.maze.width):
                 cell = self.maze.grid[y][x]
@@ -129,7 +129,7 @@ class DrawingMaze:
                 self.data[offset] = 0xFF
                 self.data[offset + 1] = 0xFF
                 self.data[offset + 2] = 0xFF
-                self.data[offset + 3] = 0xFF 
+                self.data[offset + 3] = 0xFF
 
     def exit_win(self):
         print("Exited with ESC ...")

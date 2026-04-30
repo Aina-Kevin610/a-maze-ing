@@ -46,7 +46,7 @@ def main() -> None:
     # maze.generate()  # Remove this to allow step-by-step animation
     # hexa_maze = read_maze()  # Not needed for animation
     # hexa_maze = hexa_maze.split("\n")
-    draw = DrawingMaze(maze, None, 0x000000FF)
+    draw = DrawingMaze(maze, None, 0xFFFFFFFF)
     draw.draw_maze()
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, draw)
     draw.m.mlx_loop(draw.mlx)
