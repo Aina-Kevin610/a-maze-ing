@@ -1,4 +1,6 @@
 from maze_gen import Maze
+from render import Menu
+
 from render import DrawingMaze
 import sys
 
@@ -22,6 +24,7 @@ def main() -> None:
     draw = DrawingMaze(maze, hexa_maze, 0xffffffff)
     draw.draw_maze()
     draw.m.mlx_loop(draw.mlx)
+    menu = Menu()
 
 
 if __name__ == "__main__":

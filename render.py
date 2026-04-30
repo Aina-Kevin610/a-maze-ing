@@ -8,16 +8,30 @@ class DrawingMaze:
         w_win = 1080
         self.m = Mlx()
         self.mlx = self.m.mlx_init()
+        if not self.mlx:
+            sys.exit(0)
         self.win =  self.m.mlx_new_window(self.mlx, w_win, h_win, "A-MAZE-ING !")
         if not self.win:
+            sys.exit(0)
+        self.img = self.m.mlx_new_image(self.mlx, w_win, h_win)
+        if not self.img:
             sys.exit(0)
         self.cell_size_w = w_win // maze.width
         self.cell_size_h = h_win // maze.height
         self.color = color
+        self.data, self.bpp, self.size_line , _ = self.mlx_get_data_addr(self.img)
         self.maze = maze
         self.hexa_maze = hexa_maze
         self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
 
+    def my_put_pixel(self, x, y):
+        offset = (y *self.size_line) + (x * self.bpp)
+        r = (self.color >> 16) & 0xFF 
+        b = self.color & 0xFF
+        g = (self.color >> 8) & 0xFF
+        self.data[offset] = b
+        self.data[offset + 1] = g
+        self.data[offset + 2] = r
 
     def handle_keys(self, keycode, params):
         colors = [
@@ -44,15 +58,13 @@ class DrawingMaze:
             self.draw_maze()
         return 0
 
-
     def draw_line_h(self, x0, x1, y) -> None:
         for x in range(x0, x1):
-            self.m.mlx_pixel_put(self.mlx, self.win, x, y, self.color)
-
+            self.my_put_pixel(x, y)
 
     def draw_line_v(self, x, y0, y1) -> None:
         for y in range(y0, y1):
-            self.m.mlx_pixel_put(self.mlx, self.win, x, y, self.color)
+            self.my_put_pixel(x, y)
 
     
     def draw_cell(self, x, y) -> None:
@@ -60,7 +72,6 @@ class DrawingMaze:
         self.draw_line_h(x, x + self.cell_size_w, y + self.cell_size_h)
         self.draw_line_v(x, y, y + self.cell_size_h)
         self.draw_line_v(x + self.cell_size_w, y, y + self.cell_size_h)
-
 
     def north(self, x, y):
         self.draw_line_h(x, x + self.cell_size_w, y)
@@ -87,11 +98,10 @@ class DrawingMaze:
             y += self.cell_size_h
             i += 1
         
-
     def clear_win(self):
         for y in range(720):
             for x in range(720):
-                self.m.mlx_pixel_put(self.mlx, self.win, x, y, 0x000000FF)
+                self.my_put_pixel(self.mlx, self.win, x, y, 0x000000FF)
     
     def draw_maze(self):
         self.clear_win()
@@ -149,3 +159,30 @@ class DrawingMaze:
                     self.west(x, y)
                 x += self.cell_size_w
             y += self.cell_size_h
+
+    def exit_win(self):
+        print("Exited with ESC ...")
+        self.m.mlx_destroy_window(self.mlx, self.win)
+        self.m.mlx_loop_exit(self.mlx)
+
+
+class Menu:
+    def __init__(self, draw):
+        self.draw = draw
+        self.m = Mlx()
+        self.mlx = self.m.mlx_init()
+        self.win = self.m.mlx_new_window(self.mlx, 320, 320, "MENU !")
+        self.m.mlx_string_put(self.mlx, self.win, 320 // 2 + 50, 75, 0xffffffff, "OPTIONS:")
+        self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
+        self.m.mlx_loop(self.mlx)
+
+        def handle_keys(self, keycode, params):
+            if keycode == 65307:
+                print("Exited with ESC ...")
+                self.m.mlx_destroy_window(self.mlx, self.win)
+                self.m.mlx_loop_exit(self.mlx)
+            if keycode == 65293:
+                print("Restartint...")
+                self.maze.generate()
+                self.draw_maze()
+            return 0
