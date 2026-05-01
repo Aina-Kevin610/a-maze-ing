@@ -1,19 +1,8 @@
 import random
-
 from maze_gen import Maze
 # from render import Menu
-
 from render import DrawingMaze
 import sys
-
-
-def read_maze(filename: str = "maze.txt") -> str:
-    try:
-        with open(filename, "r") as f:
-            return f.read()
-    except FileNotFoundError:
-        print("Error - OUTPUT_FILE not generated !")
-        sys.exit(0)
 
 
 def loop_hook(param):
@@ -36,18 +25,16 @@ def loop_hook(param):
         else:
             draw.maze.current_x, draw.maze.current_y = result
             draw.maze.phase = "kill"
-    draw.draw_maze() 
+    draw.draw_cell() 
 
 
 
 def main() -> None:
     
     maze = Maze()
-    # maze.generate()  # Remove this to allow step-by-step animation
-    # hexa_maze = read_maze()  # Not needed for animation
-    # hexa_maze = hexa_maze.split("\n")
-    draw = DrawingMaze(maze, None, 0xFFFFFFFF)
-    draw.draw_maze()
+    grid = maze.generate()
+    maze.save(grid)
+    draw = DrawingMaze(maze, None, 0xFF000000)
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, draw)
     draw.m.mlx_loop(draw.mlx)
     # menu = Menu()

@@ -26,7 +26,7 @@ class Maze:
 
     def generate(self) -> None:
         if self.algo == "hunt_and_kill":
-            return self.hunt_and_kill()
+            return self.grid
 
 
     def hexa_maze(self) -> list[list[str]]:
