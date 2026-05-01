@@ -27,9 +27,6 @@ class DrawingMaze:
         self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
         self.exit_color = 0xFFFF00FF
         self.entry_color = 0xFFFFFFFF
-        self.fill_cell(int(self.maze.entry[0]), int(self.maze.entry[1]), self.entry_color)
-        self.fill_cell(int(self.maze.exit[0]), int(self.maze.exit[1]), self.exit_color)
-
 
 
     def my_put_pixel(self, x, y, color):
@@ -123,6 +120,8 @@ class DrawingMaze:
 
     def draw_cell(self):
         self.clear_image()
+        for (x, y) in self.maze.protected:
+            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
         self.fill_cell(int(self.maze.entry[0]) * self.cell_size_w,
                        int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
         self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w, 

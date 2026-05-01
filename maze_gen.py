@@ -2,6 +2,20 @@ from parsing import parse_config
 import random
 
 
+DIGITS = {
+    '4': [[1,0,0,1,0],
+          [1,0,0,1,0],
+          [1,1,1,1,0],
+          [0,0,0,1,0],
+          [0,0,0,1,0]],
+
+    '2': [[1,1,1,1,0],
+          [0,0,0,1,0],
+          [1,1,1,1,0],
+          [1,0,0,0,0],
+          [1,1,1,1,0]]
+}
+
 class Maze:
     def __init__(self, config: dict = parse_config()) -> None:
         self.width = int(config["WIDTH"])
@@ -18,6 +32,41 @@ class Maze:
         self.phase = "kill"
         self.wall = 0b1111
         self.started = False
+        self.protected = set()
+        self.__init_42()
+
+
+    def __init_42(self):
+        scale_x = self.width  // 11
+        scale_y = self.height // 7
+        scale   = min(scale_x, scale_y) // 2
+
+        total_w = 11 * scale
+        total_h = 7  * scale
+        start_x = (self.width  - total_w) // 2
+        start_y = (self.height - total_h) // 2
+
+        char_idx = 0
+        for char in ['4', '2']:
+            digit = DIGITS[char]
+            row_i = 0
+            while row_i < len(digit):
+                col_i = 0
+                while col_i < len(digit[row_i]):
+                    if digit[row_i][col_i] == 1:
+                        bx = start_x + char_idx * 6 * scale + col_i * scale
+                        by = start_y + row_i * scale
+                        sy = 0
+                        while sy < scale:
+                            sx = 0
+                            while sx < scale:
+                                self.protected.add((bx + sx, by + sy))
+                                self.visited[by + sy][bx + sx] = True
+                                sx += 1
+                            sy += 1
+                    col_i += 1
+                row_i += 1
+            char_idx += 1
 
 
     def __init_grid(self) -> list[list[int]]:
@@ -67,16 +116,13 @@ class Maze:
 
 
     def get_neighbors(self, x, y):
-        way = [
-            ( 0, -1), 
-            ( 1,  0),
-            ( 0,  1),
-            (-1,  0)
-        ]
+        way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         neighbors = []
         for dx, dy in way:
             xn, yn = dx + x, dy + y
-            if 0 <= xn < self.width and 0 <= yn < self.height and not self.visited[yn][xn]:
+            if 0 <= xn < self.width and 0 <= yn < self.height \
+            and not self.visited[yn][xn] \
+            and (xn, yn) not in self.protected:
                 neighbors.append((xn, yn))
         return neighbors
 
@@ -86,7 +132,9 @@ class Maze:
         neighbors = []
         for dx, dy in way:
             xn, yn = dx + x, dy + y
-            if 0 <= xn < self.width and 0 <= yn < self.height and self.visited[yn][xn]:
+            if 0 <= xn < self.width and 0 <= yn < self.height \
+            and self.visited[yn][xn] \
+            and (xn, yn) not in self.protected:
                 neighbors.append((xn, yn))
         return neighbors
 
