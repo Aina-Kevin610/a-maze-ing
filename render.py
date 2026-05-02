@@ -81,12 +81,6 @@ class DrawingMaze:
         for y in range(y0, y1):
             self.my_put_pixel(x, y, color)
 
-    
-    # def draw_cell(self, x, y) -> None:
-    #     self.draw_line_h(x, x + self.cell_size_w, y)
-    #     self.draw_line_h(x, x + self.cell_size_w, y + self.cell_size_h)
-    #     self.draw_line_v(x, y, y + self.cell_size_h)
-    #     self.draw_line_v(x + self.cell_size_w, y, y + self.cell_size_h)
 
     def north(self, x, y):
         self.draw_line_h(x, x + self.cell_size_w, y, self.wall_color)
@@ -157,22 +151,4 @@ class DrawingMaze:
 
 
 # class Menu:
-#     def __init__(self, draw):
-#         self.draw = draw
-#         self.m = Mlx()
-#         self.mlx = self.m.mlx_init()
-#         self.win = self.m.mlx_new_window(self.mlx, 320, 320, "MENU !")
-#         self.m.mlx_string_put(self.mlx, self.win, 320 // 2 + 50, 75, 0xffffffff, "OPTIONS:")
-#         self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
-#         self.m.mlx_loop(self.mlx)
-
-#         def handle_keys(self, keycode, params):
-#             if keycode == 65307:
-#                 print("Exited with ESC ...")
-#                 self.m.mlx_destroy_window(self.mlx, self.win)
-#                 self.m.mlx_loop_exit(self.mlx)
-#             if keycode == 65293:
-#                 print("Restartint...")
-#                 self.maze.generate()
-#                 self.draw_maze()
-#             return 0
+#     def __init__(self, )

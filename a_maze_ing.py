@@ -1,8 +1,6 @@
 import random
 from maze_gen import Maze
-# from render import Menu
 from render import DrawingMaze
-import sys
 
 
 def loop_hook(param):
@@ -22,18 +20,17 @@ def loop_hook(param):
         result = draw.maze.hunt()
         if result is None:
             draw.maze.phase = "done"
+            draw.maze.save(draw.maze.hexa_maze())
         else:
             draw.maze.current_x, draw.maze.current_y = result
             draw.maze.phase = "kill"
-    draw.draw_cell() 
+    draw.draw_cell()
 
 
 
 def main() -> None:
     
     maze = Maze()
-    grid = maze.generate()
-    maze.save(grid)
     draw = DrawingMaze(maze, None, 0xFF000000)
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, draw)
     draw.m.mlx_loop(draw.mlx)

@@ -73,9 +73,8 @@ class Maze:
         return [[15 for _ in range(self.width)] for _ in range(self.height)]
 
 
-    def generate(self) -> None:
-        if self.algo == "hunt_and_kill":
-            return self.grid
+    def generate(self) -> list[list[int]]: 
+        return self.grid
 
 
     def hexa_maze(self) -> list[list[str]]:
@@ -144,6 +143,8 @@ class Maze:
         if not neighbors:
             return False
         xn, yn = random.choice(neighbors)
+        while (xn, yn) in self.protected:
+            xn, yn = random.choice(neighbors)
         self.current_x, self.current_y, self.wall = self.remove_wall(self.current_x, self.current_y, xn, yn)
         return True
 
@@ -153,7 +154,7 @@ class Maze:
         while i < self.height:
             j = 0
             while j < self.width:
-                if not self.visited[i][j]:
+                if not self.visited[i][j] and (j, i) not in self.protected:
                     v_neighbors = self.get_visited_neighbors(j, i)
                     if v_neighbors:
                         xn, yn = random.choice(v_neighbors)
@@ -164,26 +165,27 @@ class Maze:
         return None
 
 
-    def hunt_and_kill(self) -> list[list[str]]:
-        print("=== Hunt and Kill ===")
-        self.current_x, self.current_y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-        self.visited[self.current_y][self.current_x] = True
-        while not self.is_all_visited():
-            self.kill()
-            if self.is_all_visited():
-                break
-            result = self.hunt()
-            if result is None:
-                break
-            self.current_x, self.current_y = result
-        self.save(self.hexa_maze())
-        return self.hexa_maze()
+    # def hunt_and_kill(self) -> list[list[str]]:
+    #     print("=== Hunt and Kill ===")
+    #     self.current_x, self.current_y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
+    #     self.visited[self.current_y][self.current_x] = True
+    #     while not self.is_all_visited():
+    #         self.kill()
+    #         if self.is_all_visited():
+    #             break
+    #         result = self.hunt()
+    #         if result is None:
+    #             break
+    #         self.current_x, self.current_y = result
+    #     self.save(self.hexa_maze())
+    #     return self.hexa_maze()
 
 
     def save(self, grid) -> None:
         print("Saving maze in", self.output_file,"...")
         try:
             f = open(self.output_file, "w")
+            # grid = self.hexa_maze(grid)
             for x in grid:
                 f.write(str(x).replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace(" ", "") + "\n")
             f.write(f"\n{str(self.entry).replace("(", "").replace(")", "").replace("'", "")}")
