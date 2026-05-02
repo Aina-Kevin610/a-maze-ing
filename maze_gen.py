@@ -39,7 +39,7 @@ class Maze:
     def __init_42(self):
         scale_x = self.width  // 11
         scale_y = self.height // 7
-        scale   = min(scale_x, scale_y) // 2
+        scale = max(1, min(scale_x, scale_y) // 2)
 
         total_w = 11 * scale
         total_h = 7  * scale
@@ -75,8 +75,8 @@ class Maze:
 
     def generate(self) -> list[list[int]]: 
         if self.algo == "hunt_and_kill":
-            self.save(self.hunt_and_kill())
-        return self.grid
+            return self.hunt_and_kill()
+        
 
 
     def hexa_maze(self) -> list[list[str]]:
@@ -205,18 +205,20 @@ class Maze:
                 else:
                     self.current_x, self.current_y = result
                     self.phase = "kill"
-            return self.hexa_maze()
+        return self.hexa_maze()
 
 
     def save(self, grid) -> None:
         print("Saving maze in", self.output_file,"...")
         try:
-            f = open(self.output_file, "w")
-            for x in grid:
-                f.write(str(x).replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace(" ", "") + "\n")
-            f.write(f"\n{str(self.entry).replace("(", "").replace(")", "").replace("'", "")}")
-            f.write(f"\n{str(self.exit).replace("(", "").replace(")", "").replace("'", "")}")
+            with open(self.output_file, "w") as f:
+                for x in grid:
+                    f.write(str(x).replace("[", "").replace("]", "")
+                                .replace(",", "").replace("'", "")
+                                .replace(" ", "") + "\n")
+                entry = str(self.entry).replace("(", "").replace(")", "").replace("'", "")
+                exit_ = str(self.exit).replace("(", "").replace(")", "").replace("'", "")
+                f.write(f"\n{entry}")
+                f.write(f"\n{exit_}")
         except Exception:
             print(f"Error - {self.output_file} not created !")
-        finally:
-            f.close()
