@@ -74,6 +74,8 @@ class Maze:
 
 
     def generate(self) -> list[list[int]]: 
+        if self.algo == "hunt_and_kill":
+            self.save(self.hunt_and_kill())
         return self.grid
 
 
@@ -164,28 +166,52 @@ class Maze:
             i += 1
         return None
 
+    def step(self) -> bool:
+        if self.phase == "done":
+            return False
+        if self.phase == "kill":
+            again = self.kill()
+            if not again:
+                self.phase = "hunt"
+            return True
+        if self.phase == "hunt":
+            result = self.hunt()
+            if result is None:
+                self.phase = "done"
+                return False
+            self.current_x, self.current_y = result
+            self.phase = "kill"
+            return True
+        return False
 
-    # def hunt_and_kill(self) -> list[list[str]]:
-    #     print("=== Hunt and Kill ===")
-    #     self.current_x, self.current_y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-    #     self.visited[self.current_y][self.current_x] = True
-    #     while not self.is_all_visited():
-    #         self.kill()
-    #         if self.is_all_visited():
-    #             break
-    #         result = self.hunt()
-    #         if result is None:
-    #             break
-    #         self.current_x, self.current_y = result
-    #     self.save(self.hexa_maze())
-    #     return self.hexa_maze()
+
+    def hunt_and_kill(self) -> list[list[str]]:
+        print("=== Hunt and Kill ===")
+        while self.phase != "done":
+            if not self.started:
+                self.current_x = random.randint(0, self.width - 1)
+                self.current_y = random.randint(0, self.height - 1)
+                self.visited[self.current_y][self.current_x] = True
+                self.started = True
+            if self.phase == "kill":
+                again = self.kill()
+                if not again:
+                    self.phase = "hunt"
+            elif self.phase == "hunt":
+                result = self.hunt()
+                if result is None:
+                    self.phase = "done"
+                    self.save(self.hexa_maze())
+                else:
+                    self.current_x, self.current_y = result
+                    self.phase = "kill"
+            return self.hexa_maze()
 
 
     def save(self, grid) -> None:
         print("Saving maze in", self.output_file,"...")
         try:
             f = open(self.output_file, "w")
-            # grid = self.hexa_maze(grid)
             for x in grid:
                 f.write(str(x).replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace(" ", "") + "\n")
             f.write(f"\n{str(self.entry).replace("(", "").replace(")", "").replace("'", "")}")

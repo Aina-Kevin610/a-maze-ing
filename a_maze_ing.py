@@ -12,18 +12,9 @@ def loop_hook(param):
         draw.maze.current_y = random.randint(0, draw.maze.height - 1)
         draw.maze.visited[draw.maze.current_y][draw.maze.current_x] = True
         draw.maze.started = True
-    if draw.maze.phase == "kill":
-        again = draw.maze.kill()
-        if not again:
-            draw.maze.phase = "hunt"
-    elif draw.maze.phase == "hunt":
-        result = draw.maze.hunt()
-        if result is None:
-            draw.maze.phase = "done"
-            draw.maze.save(draw.maze.hexa_maze())
-        else:
-            draw.maze.current_x, draw.maze.current_y = result
-            draw.maze.phase = "kill"
+    alive = draw.maze.step()
+    if not alive:
+        draw.maze.save(draw.maze.hexa_maze())
     draw.draw_cell()
 
 
