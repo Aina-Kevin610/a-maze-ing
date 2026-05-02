@@ -91,8 +91,8 @@ def is_valid(final: dict[str, Any]) -> None:
         int(final["EXIT"][0])
         int(final["EXIT"][1])
         str(final["PERFECT"])
-        if int(final["WIDTH"]) <= 7 or int(final["HEIGHT"]) <= 5:
-            raise ParseError("Too small HEIGHT or WIDTH!")
+        if int(final["WIDTH"]) < 10 or int(final["HEIGHT"]) < 10:
+            raise ParseError("Too small HEIGHT or WIDTH (minimum:10 x 10)!")
         if not final["OUTPUT_FILE"].endswith(".txt"):
             raise ParseError("FILE OUTPUT's extension must be '.txt' !")
         if final["PERFECT"] != "True" and final["PERFECT"] != "False":
@@ -101,6 +101,24 @@ def is_valid(final: dict[str, Any]) -> None:
             raise ParseError("Unknown parameter for ALGO!")
         if len(final["ENTRY"]) != 2 or len(final["EXIT"]) != 2:
             raise ParseError("Invalid ENTRY or EXIT parameter!")
+        if 0 < int(final["ENTRY"][1]) > int(final["WIDTH"]):
+            raise ParseError("Entry point out of range!")
+        if 0 < int(final["ENTRY"][0]) > int(final["WIDTH"]):
+            raise ParseError("Entry point out of range!")
+        if 0 < int(final["EXIT"][1]) > int(final["WIDTH"]):
+            raise ParseError("Exit point out of range!")
+        if 0 < int(final["EXIT"][0]) > int(final["WIDTH"]):
+            raise ParseError("Exit point out of range!")
+        if 0 < int(final["ENTRY"][1]) > int(final["HEIGHT"]):
+            raise ParseError("Entry point out of range!")
+        if 0 < int(final["ENTRY"][0]) > int(final["HEIGHT"]):
+            raise ParseError("Entry point out of range!")
+        if 0 < int(final["EXIT"][1]) > int(final["HEIGHT"]):
+            raise ParseError("Exit point out of range!")
+        if 0 < int(final["EXIT"][0]) > int(final["HEIGHT"]):
+            raise ParseError("Exit point out of range!")
+        if final["ENTRY"] == final["EXIT"]:
+            raise ParseError("ENTRY and EXIT at the position!")
         if not "ALGO" in final.keys():
             raise ParseError("Missing mandatory config [ALGO]")
         if not "HEIGHT" in final.keys():
