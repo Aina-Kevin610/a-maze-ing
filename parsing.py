@@ -91,7 +91,7 @@ def is_valid(final: dict[str, Any]) -> None:
         int(final["EXIT"][0])
         int(final["EXIT"][1])
         str(final["PERFECT"])
-        if int(final["WIDTH"]) < 10 or int(final["HEIGHT"]) < 10:
+        if int(final["WIDTH"]) < 13 or int(final["HEIGHT"]) < 13:
             raise ParseError("Too small HEIGHT or WIDTH (minimum:10 x 10)!")
         if not final["OUTPUT_FILE"].endswith(".txt"):
             raise ParseError("FILE OUTPUT's extension must be '.txt' !")
