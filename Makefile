@@ -5,23 +5,8 @@ EXEC       = $(VENV)/bin/python
 RUFF       = $(VENV)/bin/ruff
 PYTEST     = $(VENV)/bin/pytest
 MAIN       = a_maze_ing.py
-SRC        = .
+SRC        = a_maze_ing.py parsing.py maze_gen.py render.py
 
-.DEFAULT_GOAL = help
-
-.PHONY: help install run debug lint test clean fclean re
-
-help:
-	@echo "Usage: make <target>"
-	@echo ""
-	@echo "  install   create venv and install dependencies"
-	@echo "  run       run the project"
-	@echo "  debug     run with pdb debugger"
-	@echo "  lint      check code with ruff (strict)"
-	@echo "  test      run tests with pytest"
-	@echo "  clean     remove __pycache__ and .mypy_cache"
-	@echo "  fclean    clean + remove venv"
-	@echo "  re        fclean + install"
 
 install: $(VENV)/bin/activate
 
@@ -51,3 +36,5 @@ fclean: clean
 	rm -rf $(VENV)
 
 re: fclean install
+
+.PHONY: help install run debug lint test clean fclean re

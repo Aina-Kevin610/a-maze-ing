@@ -62,7 +62,7 @@ class Maze:
     def generate(self) -> list[list[int]]: 
         if self.algo == "hunt_and_kill":
             return self.hunt_and_kill()
-        
+
 
 
     def hexa_maze(self) -> list[list[str]]:

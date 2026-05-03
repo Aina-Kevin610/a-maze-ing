@@ -1,6 +1,7 @@
 import random
 from maze_gen import Maze
 from render import DrawingMaze
+from render import Menu
 
 
 def loop_hook(param):
@@ -21,12 +22,13 @@ def loop_hook(param):
 
 def main() -> None:
     
+    menu = Menu()
     maze = Maze()
-    draw = DrawingMaze(maze, None, 0xFF000000)
+    draw = DrawingMaze(menu, maze, None, 0xFF000000)
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, draw)
     draw.m.mlx_loop(draw.mlx)
     draw.maze.generate()
-    # menu = Menu()
+    
 
 
 if __name__ == "__main__":
