@@ -25,6 +25,7 @@ def main() -> None:
     draw = DrawingMaze(maze, None, 0xFF000000)
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, draw)
     draw.m.mlx_loop(draw.mlx)
+    draw.maze.generate()
     # menu = Menu()
 
 

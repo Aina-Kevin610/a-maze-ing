@@ -2,18 +2,21 @@ from parsing import parse_config
 import random
 
 
-DIGITS = {
-    '4': [[1,0,0,1,0],
-          [1,0,0,1,0],
-          [1,1,1,1,0],
-          [0,0,0,1,0],
-          [0,0,0,1,0]],
-
-    '2': [[1,1,1,1,0],
-          [0,0,0,1,0],
-          [1,1,1,1,0],
-          [1,0,0,0,0],
-          [1,1,1,1,0]]
+pattern = {
+    "42": [
+    [1,0,0,1,0,1,1,1,1,0],
+    [1,0,0,1,0,0,0,0,1,0],
+    [1,1,1,1,0,1,1,1,1,0],
+    [0,0,0,1,0,1,0,0,0,0],
+    [0,0,0,1,0,1,1,1,1,0]
+    ],
+    "HERY": [
+    [1,0,0,1,0,1,1,1,1,0,1,1,1,1,0,1,0,0,1,0],
+    [1,0,0,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,0],
+    [1,1,1,1,0,1,1,1,0,0,1,1,1,1,0,1,1,1,1,0],
+    [1,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,1,0],
+    [1,0,0,1,0,1,1,1,1,0,1,0,0,1,0,1,1,1,1,0]
+    ]
 }
 
 class Maze:
@@ -37,36 +40,19 @@ class Maze:
 
 
     def __init_42(self):
-        scale_x = self.width  // 11
-        scale_y = self.height // 7
-        scale = max(1, min(scale_x, scale_y) // 2)
-
-        total_w = 11 * scale
-        total_h = 7  * scale
-        start_x = (self.width  - total_w) // 2
-        start_y = (self.height - total_h) // 2
-
-        char_idx = 0
-        for char in ['4', '2']:
-            digit = DIGITS[char]
-            row_i = 0
-            while row_i < len(digit):
-                col_i = 0
-                while col_i < len(digit[row_i]):
-                    if digit[row_i][col_i] == 1:
-                        bx = start_x + char_idx * 6 * scale + col_i * scale
-                        by = start_y + row_i * scale
-                        sy = 0
-                        while sy < scale:
-                            sx = 0
-                            while sx < scale:
-                                self.protected.add((bx + sx, by + sy))
-                                self.visited[by + sy][bx + sx] = True
-                                sx += 1
-                            sy += 1
-                    col_i += 1
-                row_i += 1
-            char_idx += 1
+        x_grid = self.width // 2
+        y_grid = self.height // 2
+        pat = pattern["42"]
+        offset_x = len(pat[0]) // 2
+        offset_y = len(pat) // 2
+        i = 0
+        while i < len(pat):
+            j = 0
+            while j < len(pat[i]):
+                if pat[i][j] == 1:
+                    self.protected.add((x_grid - offset_x + j, y_grid - offset_y + i))
+                j += 1
+            i += 1
 
 
     def __init_grid(self) -> list[list[int]]:

@@ -7,6 +7,12 @@ class DrawingMaze:
     def __init__(self, maze, hexa_maze, wall_color = 0x00FF00FF, bg_color = 0x000000FF) -> None:
         self.h_win = 720
         self.w_win = 1080
+        self.cell_size_w = self.w_win // maze.width
+        self.cell_size_h = self.h_win // maze.height
+        if self.w_win % maze.width != 0:
+            self.w_win = self.w_win - (self.w_win - (maze.width * self.cell_size_w))
+        if self.h_win % maze.height != 0:
+            self.h_win = self.h_win - (self.h_win - (maze.height * self.cell_size_h))
         self.m = Mlx()
         self.mlx = self.m.mlx_init()
         if not self.mlx:
@@ -17,8 +23,6 @@ class DrawingMaze:
         self.img = self.m.mlx_new_image(self.mlx, self.w_win, self.h_win)
         if not self.img:
             sys.exit(0)
-        self.cell_size_w = self.w_win // maze.width
-        self.cell_size_h = self.h_win // maze.height
         self.wall_color = wall_color
         self.bg_color = bg_color
         self.data, self.bpp, self.size_line , _ = self.m.mlx_get_data_addr(self.img)
