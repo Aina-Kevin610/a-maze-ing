@@ -82,7 +82,8 @@ def entry_exit(new_content: dict[str, str]) -> dict[str, Any]:
 def is_valid(final: dict[str, Any]) -> None:
     algos = [
         "DFS",
-        "hunt_and_kill"
+        "hunt_and_kill",
+        "backtracking"
     ]
     try:
         str(final["ALGO"])

@@ -41,8 +41,10 @@ class Maze:
         self.rand: random.Random = random.Random()
         if self.seed:
             self.rand = random.Random(self.seed)
-        
-
+        if self.entry in self.protected:
+            print("Inaccessible entry position!")
+        if self.exit in self.protected:
+            print("Inaccessible exity position!")
 
     def __init_42(self):
         x_grid = self.width // 2
@@ -68,7 +70,8 @@ class Maze:
     def generate(self) -> list[list[int]]: 
         if self.algo == "hunt_and_kill":
             return self.hunt_and_kill()
-
+        elif self.algo == "backtracking":
+            return self.backtracking()
 
 
     def hexa_maze(self) -> list[list[str]]:
