@@ -36,7 +36,11 @@ class Maze:
         self.wall = 0b1111
         self.started = False
         self.protected = set()
-        self.__init_42()
+        self.seed = 1
+        # self.__init_42()
+        self.rand: random.Random = random.Random()
+        if self.seed:
+            self.rand = random.Random(self.seed)
 
 
     def __init_42(self):
@@ -53,6 +57,7 @@ class Maze:
                     self.protected.add((x_grid - offset_x + j, y_grid - offset_y + i))
                 j += 1
             i += 1
+
 
 
     def __init_grid(self) -> list[list[int]]:
@@ -127,17 +132,23 @@ class Maze:
 
 
     def kill(self):
+        # rand: random.Random = random.Random()
+        # if self.seed:
+        #     rand = random.Random(self.seed)
         neighbors = self.get_neighbors(self.current_x, self.current_y)
         if not neighbors:
             return False
-        xn, yn = random.choice(neighbors)
+        xn, yn = self.rand.choice(neighbors)
         while (xn, yn) in self.protected:
-            xn, yn = random.choice(neighbors)
+            xn, yn = self.rand.choice(neighbors)
         self.current_x, self.current_y, self.wall = self.remove_wall(self.current_x, self.current_y, xn, yn)
         return True
 
 
     def hunt(self):
+        # rand: random.Random = random.Random()
+        # if self.seed:
+        #     rand = random.Random(self.seed)
         i = 0
         while i < self.height:
             j = 0
@@ -145,7 +156,7 @@ class Maze:
                 if not self.visited[i][j] and (j, i) not in self.protected:
                     v_neighbors = self.get_visited_neighbors(j, i)
                     if v_neighbors:
-                        xn, yn = random.choice(v_neighbors)
+                        xn, yn = self.rand.choice(v_neighbors)
                         self.remove_wall(j, i, xn, yn)
                         return j, i 
                 j += 1
@@ -175,8 +186,8 @@ class Maze:
         print("=== Hunt and Kill ===")
         while self.phase != "done":
             if not self.started:
-                self.current_x = random.randint(0, self.width - 1)
-                self.current_y = random.randint(0, self.height - 1)
+                self.current_x = self.rand.randint(0, self.width - 1)
+                self.current_y = self.rand.randint(0, self.height - 1)
                 self.visited[self.current_y][self.current_x] = True
                 self.started = True
             if self.phase == "kill":
@@ -191,6 +202,28 @@ class Maze:
                 else:
                     self.current_x, self.current_y = result
                     self.phase = "kill"
+        return self.hexa_maze()
+
+
+    def backtracking(self):
+        stack = []
+        x = self.rand.randint(0, self.width - 1)
+        y = self.rand.randint(0, self.height - 1)
+        while (x, y) in self.protected:
+            x = self.rand.randint(0, self.width - 1)
+            y = self.rand.randint(0, self.height - 1)
+        self.visited[y][x] = True
+        stack.append((x, y))
+        while stack:
+            x, y = stack[-1]
+            neighbors = self.get_neighbors(x, y)
+            if neighbors:
+                xn, yn = self.rand.choice(neighbors)
+                self.remove_wall(x, y, xn, yn)
+                self.visited[yn][xn] = True
+                stack.append((xn, yn))
+            else:
+                stack.pop()
         return self.hexa_maze()
 
 

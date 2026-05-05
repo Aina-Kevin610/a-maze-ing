@@ -4,9 +4,9 @@ import sys
 
 
 class DrawingMaze:
-    def __init__(self, menu, maze, hexa_maze, wall_color = 0x00FF00FF, bg_color = 0x000000FF) -> None:
-        self.menu = menu
-        self.menu.m.mlx_loop(menu.mlx)
+    def __init__(self, maze, hexa_maze, wall_color = 0x00FF00FF, bg_color = 0x000000FF) -> None:
+        # self.menu = menu
+        # self.menu.m.mlx_loop(menu.mlx)
         self.h_win = 720
         self.w_win = 1080
         self.cell_size_w = self.w_win // maze.width

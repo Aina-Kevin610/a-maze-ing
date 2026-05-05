@@ -5,12 +5,12 @@ from render import Menu
 
 
 def loop_hook(param):
-    draw = param
+    draw, rand = param
     if draw.maze.phase == "done":
         return 
     if not draw.maze.started:
-        draw.maze.current_x = random.randint(0, draw.maze.width - 1)
-        draw.maze.current_y = random.randint(0, draw.maze.height - 1)
+        draw.maze.current_x = rand.randint(0, draw.maze.width - 1)
+        draw.maze.current_y = rand.randint(0, draw.maze.height - 1)
         draw.maze.visited[draw.maze.current_y][draw.maze.current_x] = True
         draw.maze.started = True
     alive = draw.maze.step()
@@ -22,10 +22,10 @@ def loop_hook(param):
 
 def main() -> None:
     
-    menu = Menu()
+    # menu = Menu()
     maze = Maze()
-    draw = DrawingMaze(menu, maze, None, 0xFF000000)
-    draw.m.mlx_loop_hook(draw.mlx, loop_hook, draw)
+    draw = DrawingMaze(maze, None, 0xFF000000)
+    draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand])
     draw.m.mlx_loop(draw.mlx)
     draw.maze.generate()
     

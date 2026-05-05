@@ -7,6 +7,8 @@ PYTEST     = $(VENV)/bin/pytest
 MAIN       = a_maze_ing.py
 SRC        = a_maze_ing.py parsing.py maze_gen.py render.py
 
+run: install
+	$(EXEC) $(MAIN)
 
 install: $(VENV)/bin/activate
 
@@ -15,8 +17,6 @@ $(VENV)/bin/activate: requirements.txt
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
 
-run: install
-	$(EXEC) $(MAIN)
 
 debug: install
 	$(EXEC) -m pdb $(MAIN)
