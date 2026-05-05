@@ -4,11 +4,11 @@ import random
 
 pattern = {
     "42": [
-    [1,0,0,1,0,1,1,1,1,0],
-    [1,0,0,1,0,0,0,0,1,0],
-    [1,1,1,1,0,1,1,1,1,0],
+    [0,1,0,1,0,1,1,1,0,0],
+    [0,1,0,1,0,0,0,1,0,0],
+    [0,1,1,1,0,1,1,1,0,0],
     [0,0,0,1,0,1,0,0,0,0],
-    [0,0,0,1,0,1,1,1,1,0]
+    [0,0,0,1,0,1,1,1,0,0]
     ],
     "HERY": [
     [1,0,0,1,0,1,1,1,1,0,1,1,1,1,0,1,0,0,1,0],
@@ -37,10 +37,11 @@ class Maze:
         self.started = False
         self.protected = set()
         self.seed = 1
-        # self.__init_42()
+        self.__init_42()
         self.rand: random.Random = random.Random()
         if self.seed:
             self.rand = random.Random(self.seed)
+        
 
 
     def __init_42(self):
@@ -54,7 +55,7 @@ class Maze:
             j = 0
             while j < len(pat[i]):
                 if pat[i][j] == 1:
-                    self.protected.add((x_grid - offset_x + j, y_grid - offset_y + i))
+                    self.protected.add((x_grid - offset_x + j + 1, y_grid - offset_y + i))
                 j += 1
             i += 1
 
