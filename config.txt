@@ -5,3 +5,4 @@ EXIT=2,4
 OUTPUT_FILE=maze.txt
 PERFECT=False
 ALGO=backtracking
+SEED=42

@@ -2,6 +2,10 @@ from parsing import parse_config
 import random
 
 
+class ConfigError(Exception):
+    pass
+
+
 pattern = {
     "42": [
     [0,1,0,1,0,1,1,1,0,0],
@@ -36,15 +40,12 @@ class Maze:
         self.wall = 0b1111
         self.started = False
         self.protected = set()
-        self.seed = 1
+        self.seed = config["SEED"]
         self.__init_42()
         self.rand: random.Random = random.Random()
         if self.seed:
             self.rand = random.Random(self.seed)
-        if self.entry in self.protected:
-            print("Inaccessible entry position!")
-        if self.exit in self.protected:
-            print("Inaccessible exity position!")
+
 
     def __init_42(self):
         x_grid = self.width // 2
@@ -60,6 +61,14 @@ class Maze:
                     self.protected.add((x_grid - offset_x + j + 1, y_grid - offset_y + i))
                 j += 1
             i += 1
+        try:
+            if self.entry in self.protected:
+                print("Inaccessible entry position!")
+            if self.exit in self.protected:
+                print("Inaccessible exity position!")
+
+        except ConfigError as e:
+            print(f"Error - {e}")
 
 
 

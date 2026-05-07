@@ -1,5 +1,6 @@
 import os
 from typing import Any
+import random
 
 
 class ParseError(Exception):
@@ -9,7 +10,6 @@ class ParseError(Exception):
 
 def read_file(filename: str) -> list[str]:
     content: list[str] = []
-    f = None
     try:
         if filename != "config.txt":
             raise ParseError("Invalid filename!")
@@ -92,6 +92,10 @@ def is_valid(final: dict[str, Any]) -> None:
         int(final["EXIT"][0])
         int(final["EXIT"][1])
         str(final["PERFECT"])
+        if not "ALGO" in final.keys():
+            final["ALGO"] = random.choice(algos)
+        if not "SEED" in final.keys():
+            final["SEED"] = None
         if int(final["WIDTH"]) < 3 or int(final["HEIGHT"]) < 3:
             raise ParseError("Too small HEIGHT or WIDTH (minimum:3 x 3)!")
         if not final["OUTPUT_FILE"].endswith(".txt"):
@@ -120,8 +124,6 @@ def is_valid(final: dict[str, Any]) -> None:
             raise ParseError("Exit point out of range!")
         if final["ENTRY"] == final["EXIT"]:
             raise ParseError("ENTRY and EXIT at the position!")
-        if not "ALGO" in final.keys():
-            raise ParseError("Missing mandatory config [ALGO]")
         if not "HEIGHT" in final.keys():
             raise ParseError("Missing mandatory config [HEIGHT]")
         if not "EXIT" in final.keys():
@@ -145,10 +147,8 @@ def parse_config(filename: str = "config.txt") -> dict[str, Any]:
     cleaned = clean_str(no_cmt2)
     validated = test_len_error(cleaned)
     try:
-        if len(validated) < 7:
+        if len(validated) < 6:
             raise ParseError("Missing mandatory parameter!")
-        if len(validated) > 7:
-            raise ParseError("Too many parameter!")
     except ParseError as e:
         print("Error - ", e)
         os._exit(0)
