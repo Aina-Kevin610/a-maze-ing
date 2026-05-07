@@ -1,5 +1,6 @@
 from parsing import parse_config
 import random
+import os
 
 
 class ConfigError(Exception):
@@ -41,10 +42,16 @@ class Maze:
         self.started = False
         self.protected = set()
         self.seed = config["SEED"]
-        self.__init_42()
+        if self.height >= 10 and self.width >= 10:
+            self.__init_42()
+        else:
+            print("Pattern 42 cannot be contained within the maze! (10 x 10 is requiered)")
         self.rand: random.Random = random.Random()
         if self.seed:
             self.rand = random.Random(self.seed)
+        if self.exit in self.protected:
+            print("Error!")
+            os._exit(0)
 
 
     def __init_42(self):
@@ -58,18 +65,21 @@ class Maze:
             j = 0
             while j < len(pat[i]):
                 if pat[i][j] == 1:
-                    self.protected.add((x_grid - offset_x + j + 1, y_grid - offset_y + i))
+                    if self.width <= 15:
+                        self.protected.add((x_grid - offset_x + j + 1, y_grid - offset_y + i))
+                    else:
+                        self.protected.add((x_grid - offset_x + j, y_grid - offset_y + i))
                 j += 1
             i += 1
-        try:
-            if self.entry in self.protected:
-                print("Inaccessible entry position!")
-            if self.exit in self.protected:
-                print("Inaccessible exity position!")
 
-        except ConfigError as e:
-            print(f"Error - {e}")
-
+        x, y = self.entry
+        if (int(x), int(y)) in self.protected:
+            print("Error - Inaccessible entry!")
+            os._exit(0)
+        x, y = self.exit
+        if (int(x), int(y)) in self.protected:
+            print("Error - Inaccessible exit!")
+            os._exit(0)
 
 
     def __init_grid(self) -> list[list[int]]:
@@ -145,9 +155,6 @@ class Maze:
 
 
     def kill(self):
-        # rand: random.Random = random.Random()
-        # if self.seed:
-        #     rand = random.Random(self.seed)
         neighbors = self.get_neighbors(self.current_x, self.current_y)
         if not neighbors:
             return False
@@ -159,9 +166,6 @@ class Maze:
 
 
     def hunt(self):
-        # rand: random.Random = random.Random()
-        # if self.seed:
-        #     rand = random.Random(self.seed)
         i = 0
         while i < self.height:
             j = 0
@@ -175,6 +179,7 @@ class Maze:
                 j += 1
             i += 1
         return None
+
 
     def step(self) -> bool:
         if self.phase == "done":

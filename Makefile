@@ -17,7 +17,6 @@ $(VENV)/bin/activate: requirements.txt
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
 
-
 debug: install
 	$(EXEC) -m pdb $(MAIN)
 
