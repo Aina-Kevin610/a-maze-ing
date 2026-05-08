@@ -1,4 +1,5 @@
 from mlx import Mlx
+from maze_gen import Maze
 import random
 import sys
 
@@ -94,7 +95,8 @@ class DrawingMaze:
             self.m.mlx_destroy_window(self.mlx, self.win)
             self.m.mlx_loop_exit(self.mlx)
         if keycode == 65293:
-            print("Restarting...")
+            print("Regenerating...")
+            self.maze = Maze()
             self.clear_image()
             self.m.mlx_loop_hook(self.mlx, loop_hook, [self, self.maze.rand, self.maze])
             self.m.mlx_loop(self.mlx)

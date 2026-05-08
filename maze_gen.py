@@ -20,7 +20,6 @@ pattern = {
     ]
 }
 
-
 class Maze:
     def __init__(self, config: dict = parse_config()) -> None:
         self.width = int(config["WIDTH"])
@@ -46,6 +45,7 @@ class Maze:
         self.rand: random.Random = random.Random()
         if self.seed:
             self.rand = random.Random(self.seed)
+        self.generated = False
         if self.exit in self.protected:
             print("Error!")
             os._exit(0)
@@ -189,6 +189,7 @@ class Maze:
             result = self.hunt()
             if result is None:
                 self.phase = "done"
+                self.generated = True
                 return False
             self.current_x, self.current_y = result
             self.phase = "kill"
@@ -234,6 +235,7 @@ class Maze:
     def step_backtracking(self) -> bool:
         if not self.stack:
             self.phase = "done"
+            self.generated = True
             return False
         x, y = self.stack[-1]
         self.current_x, self.current_y = x, y
@@ -266,6 +268,7 @@ class Maze:
                 stack.append((xn, yn))
             else:
                 stack.pop()
+        self.generated = True
         grid = self.hexa_maze()
         self.save(grid)
         return grid
