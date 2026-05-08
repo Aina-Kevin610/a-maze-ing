@@ -28,7 +28,7 @@ def loop_hook(param):
         if draw.maze.solve_phase not in ("idle", "done"):
             for _ in range(draw.steps_per_frame):
                 draw.maze.step_solve()
-    draw.draw_cell()
+        draw.draw_cell()
 
 def main() -> None:
     maze = Maze()

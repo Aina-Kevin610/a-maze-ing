@@ -34,6 +34,7 @@ class DrawingMaze:
     def __init__(self, maze, hexa_maze, wall_color = 0x00FF00FF, bg_color = 0x000000FF) -> None:
         self.h_win = 480
         self.w_win = 480
+        self.menu_width = 150
         self.cell_size_w = self.w_win // maze.width
         self.cell_size_h = self.h_win // maze.height
         if self.w_win % maze.width != 0:
@@ -44,7 +45,7 @@ class DrawingMaze:
         self.mlx = self.m.mlx_init()
         if not self.mlx:
             sys.exit(0)
-        self.win =  self.m.mlx_new_window(self.mlx, self.w_win, self.h_win, "A-MAZE-ING !")
+        self.win = self.m.mlx_new_window(self.mlx, self.w_win + self.menu_width, self.h_win, "A-MAZE-ING !")
         if not self.win:
             sys.exit(0)
         self.img = self.m.mlx_new_image(self.mlx, self.w_win, self.h_win)
@@ -165,12 +166,11 @@ class DrawingMaze:
                     int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
         self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w,
                     int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
-
+        
         for (x, y) in self.maze.explored:
             self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.visited_col)
         for (x, y) in self.maze.frontier:
             self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.front_col)
-
         total = self.maze.path_index
         for i, (x, y) in enumerate(self.maze.path[:self.maze.path_index]):
             self.solve_fill_cell(x, y, i, total)
@@ -206,6 +206,7 @@ class DrawingMaze:
         self.draw_line_v(0, 0, self.h_win, self.wall_color)
         self.draw_line_v(self.w_win - 1, 0, self.h_win, self.wall_color)
         self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
+        self.draw_menu()
         
 
     def clear_image(self):
@@ -221,3 +222,20 @@ class DrawingMaze:
         print("Exited with ESC ...")
         self.m.mlx_destroy_window(self.mlx, self.win)
         self.m.mlx_loop_exit(self.mlx)
+
+
+    def draw_menu(self):
+        options = [
+            ("ESC",   "Quitter"),
+            ("ENTER", "Regenerer"),
+            ("SPACE", "Couleur murs"),
+            ("+/-",   "Vitesse"),
+            ("S",     "Resoudre"),
+            ("H",     "Cacher menu"),
+        ]
+        x = self.w_win + 10
+        y = 20
+        for key, desc in options:
+            self.m.mlx_string_put(self.mlx, self.win, x, y, 0xAAAAAA, key)
+            self.m.mlx_string_put(self.mlx, self.win, x + 45, y, 0xFFFFFF, desc)
+            y += 20
