@@ -1,8 +1,8 @@
-WIDTH=10
-HEIGHT=10
+WIDTH=75
+HEIGHT=60
 ENTRY=0,0
 EXIT=9,9
 OUTPUT_FILE=maze.txt
 PERFECT=False
-ALGO=backtracking
+ALGO=hunt_and_kill
 SEED=42

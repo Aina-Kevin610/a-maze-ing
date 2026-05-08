@@ -1,6 +1,9 @@
 from parsing import parse_config
+from collections import deque
 import random
 import os
+
+
 
 
 class ConfigError(Exception):
@@ -57,7 +60,7 @@ class Maze:
     def __init_42(self):
         x_grid = self.width // 2
         y_grid = self.height // 2
-        pat = pattern["42"]
+        pat = pattern["HERY"]
         offset_x = len(pat[0]) // 2
         offset_y = len(pat) // 2
         i = 0
@@ -223,26 +226,26 @@ class Maze:
         return self.hexa_maze()
 
 
-    def backtracking(self):
-        stack = []
-        x = self.rand.randint(0, self.width - 1)
-        y = self.rand.randint(0, self.height - 1)
-        while (x, y) in self.protected:
-            x = self.rand.randint(0, self.width - 1)
-            y = self.rand.randint(0, self.height - 1)
-        self.visited[y][x] = True
-        stack.append((x, y))
-        while stack:
-            x, y = stack[-1]
-            neighbors = self.get_neighbors(x, y)
-            if neighbors:
-                xn, yn = self.rand.choice(neighbors)
-                self.remove_wall(x, y, xn, yn)
-                self.visited[yn][xn] = True
-                stack.append((xn, yn))
-            else:
-                stack.pop()
-        return self.hexa_maze()
+    # def backtracking(self):
+    #     stack = []
+    #     x = self.rand.randint(0, self.width - 1)
+    #     y = self.rand.randint(0, self.height - 1)
+    #     while (x, y) in self.protected:
+    #         x = self.rand.randint(0, self.width - 1)
+    #         y = self.rand.randint(0, self.height - 1)
+    #     self.visited[y][x] = True
+    #     stack.append((x, y))
+    #     while stack:
+    #         x, y = stack[-1]
+    #         neighbors = self.get_neighbors(x, y)
+    #         if neighbors:
+    #             xn, yn = self.rand.choice(neighbors)
+    #             self.remove_wall(x, y, xn, yn)
+    #             self.visited[yn][xn] = True
+    #             stack.append((xn, yn))
+    #         else:
+    #             stack.pop()
+    #     return self.hexa_maze()
 
 
     def save(self, grid) -> None:
@@ -259,3 +262,10 @@ class Maze:
                 f.write(f"\n{exit_}")
         except Exception:
             print(f"Error - {self.output_file} not created !")
+
+    
+    
+    def solve(self):
+        node = deque()
+        node.append(self.entry)
+        print(node)
