@@ -38,6 +38,7 @@ class Maze:
         self.started = False
         self.protected = set()
         self.seed = config["SEED"]
+        self.path = []
         if self.height >= 10 and self.width >= 10:
             self.__init_42()
         else:
@@ -291,6 +292,29 @@ class Maze:
 
     
     def solve(self):
-        node = deque()
-        node.append(self.entry)
-        print(node)
+        start = (int(self.entry[0]), int(self.entry[1]))
+        end   = (int(self.exit[0]),  int(self.exit[1]))
+        queue  = deque([start])
+        parent = {start: None}
+        while queue:
+            cur = queue.popleft()
+            if cur == end:
+                path, node = [], cur
+                while node is not None:
+                    path.append(node)
+                    node = parent[node]
+                self.path = list(reversed(path))
+                return
+            x, y = cur
+            cell = self.grid[y][x]
+            for nx, ny, walled in [
+                (x-1, y,   cell & 1),
+                (x,   y+1, (cell >> 1) & 1),
+                (x+1, y,   (cell >> 2) & 1),
+                (x,   y-1, (cell >> 3) & 1),
+            ]:
+                nb = (nx, ny)
+                if not walled and nb not in parent:
+                    parent[nb] = cur
+                    queue.append(nb)
+        self.path = []

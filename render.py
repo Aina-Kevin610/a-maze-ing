@@ -149,6 +149,9 @@ class DrawingMaze:
                        int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
         self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w, 
                        int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
+        if self.maze.path:
+            for (x, y) in self.maze.path:
+                self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0x00E87FFF)
         for y in range(self.maze.height):
             for x in range(self.maze.width):
                 if not self.maze.visited[y][x]:
