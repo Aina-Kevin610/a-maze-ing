@@ -287,6 +287,7 @@ class Maze:
                 exit_ = str(self.exit).replace("(", "").replace(")", "").replace("'", "")
                 f.write(f"\n{entry}")
                 f.write(f"\n{exit_}")
+                f.write(f"\n{self.path}")
         except Exception:
             print(f"Error - {self.output_file} not created !")
 

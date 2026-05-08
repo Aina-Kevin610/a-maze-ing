@@ -143,6 +143,17 @@ class DrawingMaze:
             self.draw_line_h(x, x + self.cell_size_w, i, color)
 
 
+    def solve_fill_cell(self, x1, y1, x2, y2, color):
+        cx1 = x1 * self.cell_size_w + self.cell_size_w // 2
+        cy1 = y1 * self.cell_size_h + self.cell_size_h // 2
+        cx2 = x2 * self.cell_size_w + self.cell_size_w // 2
+        cy2 = y2 * self.cell_size_h + self.cell_size_h // 2
+        if cx1 == cx2:
+            self.draw_line_v(cx1, min(cy1, cy2), max(cy1, cy2), color)
+        else:
+            self.draw_line_h(min(cx1, cx2), max(cx1, cx2), cy1, color)
+
+
     def draw_cell(self):
         self.clear_image()
         self.fill_cell(int(self.maze.entry[0]) * self.cell_size_w,
@@ -150,8 +161,10 @@ class DrawingMaze:
         self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w, 
                        int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
         if self.maze.path:
-            for (x, y) in self.maze.path:
-                self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0x00E87FFF)
+            for i in range(len(self.maze.path) - 1):
+                x1, y1 = self.maze.path[i]
+                x2, y2 = self.maze.path[i + 1]
+                self.solve_fill_cell(x1, y1, x2, y2, 0x00E87FFF)
         for y in range(self.maze.height):
             for x in range(self.maze.width):
                 if not self.maze.visited[y][x]:
