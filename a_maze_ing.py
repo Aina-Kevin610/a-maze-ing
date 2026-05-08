@@ -14,11 +14,6 @@ def loop_hook(param):
             alive = draw.maze.step()
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
-            draw.draw_cell()
-        else:
-            if not draw.maze.path:
-                draw.maze.solve()
-                draw.draw_cell()
     elif maze.algo == "backtracking" or maze.algo == "DFS":
         if draw.maze.phase != "done":
             if not draw.maze.started:
@@ -27,12 +22,13 @@ def loop_hook(param):
             alive = draw.maze.step_backtracking()
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
-            draw.draw_cell()
-        else:
-            if not draw.maze.path:
-                draw.maze.solve()
-                draw.draw_cell()
-
+    if draw.maze.phase == "done":
+        if draw.maze.solve_phase == "idle":
+            draw.maze.init_solve()
+        if draw.maze.solve_phase not in ("idle", "done"):
+            for _ in range(draw.steps_per_frame):
+                draw.maze.step_solve()
+    draw.draw_cell()
 
 def main() -> None:
     maze = Maze()

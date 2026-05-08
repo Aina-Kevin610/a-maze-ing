@@ -39,6 +39,14 @@ class Maze:
         self.protected = set()
         self.seed = config["SEED"]
         self.path = []
+        self.path_index = 0
+        self.explored = set()
+        self.frontier = set()
+        self.solve_phase = "idle"
+        self._bfs_queue = None
+        self._bfs_parent = None
+        self._bfs_end = None
+
         if self.height >= 10 and self.width >= 10:
             self.__init_42()
         else:
@@ -292,30 +300,83 @@ class Maze:
             print(f"Error - {self.output_file} not created !")
 
     
-    def solve(self):
+    # def solve(self):
+    #     start = (int(self.entry[0]), int(self.entry[1]))
+    #     end   = (int(self.exit[0]),  int(self.exit[1]))
+    #     queue  = deque([start])
+    #     parent = {start: None}
+    #     while queue:
+    #         cur = queue.popleft()
+    #         if cur == end:
+    #             path, node = [], cur
+    #             while node is not None:
+    #                 path.append(node)
+    #                 node = parent[node]
+    #             self.path = list(reversed(path))
+    #             return
+    #         x, y = cur
+    #         cell = self.grid[y][x]
+    #         for nx, ny, walled in [
+    #             (x-1, y,   cell & 1),
+    #             (x,   y+1, (cell >> 1) & 1),
+    #             (x+1, y,   (cell >> 2) & 1),
+    #             (x,   y-1, (cell >> 3) & 1),
+    #         ]:
+    #             nb = (nx, ny)
+    #             if not walled and nb not in parent:
+    #                 parent[nb] = cur
+    #                 queue.append(nb)
+    #     self.path = []
+
+
+    def init_solve(self):
         start = (int(self.entry[0]), int(self.entry[1]))
-        end   = (int(self.exit[0]),  int(self.exit[1]))
-        queue  = deque([start])
-        parent = {start: None}
-        while queue:
-            cur = queue.popleft()
-            if cur == end:
-                path, node = [], cur
-                while node is not None:
-                    path.append(node)
-                    node = parent[node]
-                self.path = list(reversed(path))
-                return
-            x, y = cur
-            cell = self.grid[y][x]
-            for nx, ny, walled in [
-                (x-1, y,   cell & 1),
-                (x,   y+1, (cell >> 1) & 1),
-                (x+1, y,   (cell >> 2) & 1),
-                (x,   y-1, (cell >> 3) & 1),
-            ]:
-                nb = (nx, ny)
-                if not walled and nb not in parent:
-                    parent[nb] = cur
-                    queue.append(nb)
+        self._bfs_end = (int(self.exit[0]), int(self.exit[1]))
+        self._bfs_queue = deque([start])
+        self._bfs_parent = {start: None}
+        self.explored = set()
+        self.frontier = {start}
+        self.solve_phase = "solving"
         self.path = []
+        self.path_index = 0
+
+    def step_solve(self):
+        if self.solve_phase == "tracing":
+            if self.path_index < len(self.path):
+                self.path_index += 1
+            else:
+                self.solve_phase = "done"
+            return True
+
+        if self.solve_phase != "solving" or not self._bfs_queue:
+            self.solve_phase = "done"
+            return False
+
+        cur = self._bfs_queue.popleft()
+        self.frontier.discard(cur)
+        self.explored.add(cur)
+
+        if cur == self._bfs_end:
+            node, path = cur, []
+            while node is not None:
+                path.append(node)
+                node = self._bfs_parent[node]
+            self.path = list(reversed(path))
+            self.path_index = 0
+            self.solve_phase = "tracing"
+            return True
+
+        x, y = cur
+        cell = self.grid[y][x]
+        for nx, ny, walled in [
+            (x-1, y,   cell & 1),
+            (x,   y+1, (cell >> 1) & 1),
+            (x+1, y,   (cell >> 2) & 1),
+            (x,   y-1, (cell >> 3) & 1),
+        ]:
+            nb = (nx, ny)
+            if not walled and nb not in self._bfs_parent:
+                self._bfs_parent[nb] = cur
+                self._bfs_queue.append(nb)
+                self.frontier.add(nb)
+        return True

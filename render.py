@@ -58,6 +58,11 @@ class DrawingMaze:
         self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
         self.exit_color = 0xFFFF00FF
         self.entry_color = 0xFFFFFFFF
+        self.visited_col  = 0x1A3A7AFF
+        self.front_col    = 0x00C8FFFF
+        self.path_col_start = (0x00, 0xE8, 0x7F)
+        self.path_col_end   = (0xFF, 0x40, 0x00)
+        self.steps_per_frame = 1
 
 
     def my_put_pixel(self, x, y, color):
@@ -142,29 +147,41 @@ class DrawingMaze:
         for i in range(y, y + self.cell_size_h):
             self.draw_line_h(x, x + self.cell_size_w, i, color)
 
-
-    def solve_fill_cell(self, x1, y1, x2, y2, color):
-        cx1 = x1 * self.cell_size_w + self.cell_size_w // 2
-        cy1 = y1 * self.cell_size_h + self.cell_size_h // 2
-        cx2 = x2 * self.cell_size_w + self.cell_size_w // 2
-        cy2 = y2 * self.cell_size_h + self.cell_size_h // 2
-        if cx1 == cx2:
-            self.draw_line_v(cx1, min(cy1, cy2), max(cy1, cy2), color)
-        else:
-            self.draw_line_h(min(cx1, cx2), max(cx1, cx2), cy1, color)
+    def solve_fill_cell(self, x, y, index, total):
+        t = index / max(total - 1, 1)
+        sr, sg, sb = self.path_col_start
+        er, eg, eb = self.path_col_end
+        r = int(sr + t * (er - sr))
+        g = int(sg + t * (eg - sg))
+        b = int(sb + t * (eb - sb))
+        color = (r << 24) | (g << 16) | (b << 8) | 0xFF
+        self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, color)
 
 
     def draw_cell(self):
         self.clear_image()
+
         self.fill_cell(int(self.maze.entry[0]) * self.cell_size_w,
-                       int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
-        self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w, 
-                       int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
-        if self.maze.path:
-            for i in range(len(self.maze.path) - 1):
-                x1, y1 = self.maze.path[i]
-                x2, y2 = self.maze.path[i + 1]
-                self.solve_fill_cell(x1, y1, x2, y2, 0x00E87FFF)
+                    int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
+        self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w,
+                    int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
+
+        for (x, y) in self.maze.explored:
+            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.visited_col)
+        for (x, y) in self.maze.frontier:
+            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.front_col)
+
+        total = self.maze.path_index
+        for i, (x, y) in enumerate(self.maze.path[:self.maze.path_index]):
+            self.solve_fill_cell(x, y, i, total)
+
+        if self.maze.phase != "done":
+            self.fill_cell(
+                self.maze.current_x * self.cell_size_w,
+                self.maze.current_y * self.cell_size_h,
+                0xFF6600FF
+            )
+
         for y in range(self.maze.height):
             for x in range(self.maze.width):
                 if not self.maze.visited[y][x]:
@@ -180,9 +197,14 @@ class DrawingMaze:
                     self.east(px, py)
                 if (cell >> 3) & 1:
                     self.north(px, py)
+
         if self.maze.generated:
             for (x, y) in self.maze.protected:
                 self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
+        self.draw_line_h(0, self.w_win, 0, self.wall_color)
+        self.draw_line_h(0, self.w_win, self.h_win - 1, self.wall_color)
+        self.draw_line_v(0, 0, self.h_win, self.wall_color)
+        self.draw_line_v(self.w_win - 1, 0, self.h_win, self.wall_color)
         self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
         
 
