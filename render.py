@@ -1,5 +1,5 @@
 from mlx import Mlx
-from maze_gen import Maze
+from maze_generator.maze_gen import Maze
 import random
 import sys
 

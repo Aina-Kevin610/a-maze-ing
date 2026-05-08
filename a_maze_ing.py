@@ -1,4 +1,4 @@
-from maze_gen import Maze
+from maze_generator.maze_gen import Maze
 from render import DrawingMaze
 
 
