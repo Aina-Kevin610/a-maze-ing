@@ -18,7 +18,7 @@ pattern = {
     [0,0,0,1,0,1,0,0,0,0],
     [0,0,0,1,0,1,1,1,0,0]
     ]
-}
+}   
 
 class Maze:
     def __init__(self, config: dict = parse_config()) -> None:

@@ -164,8 +164,9 @@ class DrawingMaze:
                     self.east(px, py)
                 if (cell >> 3) & 1:
                     self.north(px, py)
-        for (x, y) in self.maze.protected:
-            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
+        if self.maze.generated:
+            for (x, y) in self.maze.protected:
+                self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
         self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
         
 

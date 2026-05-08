@@ -32,7 +32,6 @@ def loop_hook(param):
 def main() -> None:
     maze = Maze()
     draw = DrawingMaze(maze, None, 0xFF000000)
-    # draw.draw_cell()
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
     draw.m.mlx_loop(draw.mlx)
 

@@ -12,10 +12,10 @@ run: install
 
 install: $(VENV)/bin/activate
 
-$(VENV)/bin/activate: requirements.txt
+$(VENV)/bin/activate:
 	$(PYTHON) -m venv $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
+	$(PIP) install -r
 
 debug: install
 	$(EXEC) -m pdb $(MAIN)
