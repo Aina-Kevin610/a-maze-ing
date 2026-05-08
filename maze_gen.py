@@ -17,15 +17,9 @@ pattern = {
     [0,1,1,1,0,1,1,1,0,0],
     [0,0,0,1,0,1,0,0,0,0],
     [0,0,0,1,0,1,1,1,0,0]
-    ],
-    "HERY": [
-    [1,0,0,1,0,1,1,1,1,0,1,1,1,1,0,1,0,0,1,0],
-    [1,0,0,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,0],
-    [1,1,1,1,0,1,1,1,0,0,1,1,1,1,0,1,1,1,1,0],
-    [1,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,1,0],
-    [1,0,0,1,0,1,1,1,1,0,1,0,0,1,0,1,1,1,1,0]
     ]
 }
+
 
 class Maze:
     def __init__(self, config: dict = parse_config()) -> None:
@@ -60,7 +54,7 @@ class Maze:
     def __init_42(self):
         x_grid = self.width // 2
         y_grid = self.height // 2
-        pat = pattern["HERY"]
+        pat = pattern["42"]
         offset_x = len(pat[0]) // 2
         offset_y = len(pat) // 2
         i = 0
@@ -69,12 +63,11 @@ class Maze:
             while j < len(pat[i]):
                 if pat[i][j] == 1:
                     if self.width <= 15:
-                        self.protected.add((x_grid - offset_x + j + 1, y_grid - offset_y + i))
+                        self.protected.add((x_grid - offset_x + j , y_grid - offset_y + i ))
                     else:
                         self.protected.add((x_grid - offset_x + j, y_grid - offset_y + i))
                 j += 1
             i += 1
-
         x, y = self.entry
         if (int(x), int(y)) in self.protected:
             print("Error - Inaccessible entry!")
@@ -92,7 +85,7 @@ class Maze:
     def generate(self) -> list[list[int]]: 
         if self.algo == "hunt_and_kill":
             return self.hunt_and_kill()
-        elif self.algo == "backtracking":
+        elif self.algo == "backtracking" or self.algo == "DFS":
             return self.backtracking()
 
 
@@ -223,29 +216,59 @@ class Maze:
                 else:
                     self.current_x, self.current_y = result
                     self.phase = "kill"
-        return self.hexa_maze()
+        grid = self.hexa_maze()
+        self.save(grid)
+        return grid
 
 
-    # def backtracking(self):
-    #     stack = []
-    #     x = self.rand.randint(0, self.width - 1)
-    #     y = self.rand.randint(0, self.height - 1)
-    #     while (x, y) in self.protected:
-    #         x = self.rand.randint(0, self.width - 1)
-    #         y = self.rand.randint(0, self.height - 1)
-    #     self.visited[y][x] = True
-    #     stack.append((x, y))
-    #     while stack:
-    #         x, y = stack[-1]
-    #         neighbors = self.get_neighbors(x, y)
-    #         if neighbors:
-    #             xn, yn = self.rand.choice(neighbors)
-    #             self.remove_wall(x, y, xn, yn)
-    #             self.visited[yn][xn] = True
-    #             stack.append((xn, yn))
-    #         else:
-    #             stack.pop()
-    #     return self.hexa_maze()
+    def init_backtracking(self):
+        x = self.rand.randint(0, self.width - 1)
+        y = self.rand.randint(0, self.height - 1)
+        while (x, y) in self.protected:
+            x = self.rand.randint(0, self.width - 1)
+            y = self.rand.randint(0, self.height - 1)
+        self.visited[y][x] = True
+        self.stack = [(x, y)]
+        self.current_x, self.current_y = x, y
+
+    def step_backtracking(self) -> bool:
+        if not self.stack:
+            self.phase = "done"
+            return False
+        x, y = self.stack[-1]
+        self.current_x, self.current_y = x, y
+        neighbors = self.get_neighbors(x, y)
+        if neighbors:
+            xn, yn = self.rand.choice(neighbors)
+            self.remove_wall(x, y, xn, yn)
+            self.stack.append((xn, yn))
+        else:
+            self.stack.pop()
+        return True
+
+
+    def backtracking(self):
+        stack = []
+        x = self.rand.randint(0, self.width - 1)
+        y = self.rand.randint(0, self.height - 1)
+        while (x, y) in self.protected:
+            x = self.rand.randint(0, self.width - 1)
+            y = self.rand.randint(0, self.height - 1)
+        self.visited[y][x] = True
+        stack.append((x, y))
+        while stack:
+            x, y = stack[-1]
+            neighbors = self.get_neighbors(x, y)
+            if neighbors:
+                xn, yn = self.rand.choice(neighbors)
+                self.remove_wall(x, y, xn, yn)
+                self.visited[yn][xn] = True
+                stack.append((xn, yn))
+            else:
+                stack.pop()
+        grid = self.hexa_maze()
+        self.save(grid)
+        return grid
 
 
     def save(self, grid) -> None:
@@ -263,7 +286,6 @@ class Maze:
         except Exception:
             print(f"Error - {self.output_file} not created !")
 
-    
     
     def solve(self):
         node = deque()

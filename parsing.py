@@ -106,13 +106,13 @@ def is_valid(final: dict[str, Any]) -> None:
             raise ParseError("Unknown parameter for ALGO!")
         if len(final["ENTRY"]) != 2 or len(final["EXIT"]) != 2:
             raise ParseError("Invalid ENTRY or EXIT parameter!")
-        if 0 < int(final["ENTRY"][1]) > int(final["WIDTH"]):
+        if 0 < int(final["ENTRY"][1]) >= int(final["WIDTH"]):
             raise ParseError("Entry point out of range!")
-        if 0 < int(final["ENTRY"][0]) > int(final["WIDTH"]):
+        if 0 < int(final["ENTRY"][0]) >= int(final["WIDTH"]):
             raise ParseError("Entry point out of range!")
-        if 0 < int(final["EXIT"][1]) > int(final["WIDTH"]):
+        if 0 < int(final["EXIT"][1]) >= int(final["WIDTH"]):
             raise ParseError("Exit point out of range!")
-        if 0 < int(final["EXIT"][0]) > int(final["WIDTH"]):
+        if 0 < int(final["EXIT"][0]) >= int(final["WIDTH"]):
             raise ParseError("Exit point out of range!")
         if 0 < int(final["ENTRY"][1]) > int(final["HEIGHT"]):
             raise ParseError("Entry point out of range!")

@@ -3,12 +3,36 @@ import random
 import sys
 
 
+def loop_hook(param):
+    draw, rand, maze = param
+
+    if maze.algo == "hunt_and_kill":
+        if draw.maze.phase == "done":
+            return 
+        if not draw.maze.started:
+            draw.maze.current_x = rand.randint(0, draw.maze.width - 1)
+            draw.maze.current_y = rand.randint(0, draw.maze.height - 1)
+            draw.maze.visited[draw.maze.current_y][draw.maze.current_x] = True
+            draw.maze.started = True
+        alive = draw.maze.step()
+        if not alive:
+            draw.maze.save(draw.maze.hexa_maze())
+        draw.draw_cell()
+    elif maze.algo == "backtracking" or maze.algo == "DFS":
+        if draw.maze.phase == "done":
+            return
+        if not draw.maze.started:
+            draw.maze.init_backtracking()
+            draw.maze.started = True
+        alive = draw.maze.step_backtracking()
+        if not alive:
+            draw.maze.save(draw.maze.hexa_maze())
+        draw.draw_cell()
+
 class DrawingMaze:
     def __init__(self, maze, hexa_maze, wall_color = 0x00FF00FF, bg_color = 0x000000FF) -> None:
-        # self.menu = menu
-        # self.menu.m.mlx_loop(menu.mlx)
-        self.h_win = 720
-        self.w_win = 1080
+        self.h_win = 480
+        self.w_win = 480
         self.cell_size_w = self.w_win // maze.width
         self.cell_size_h = self.h_win // maze.height
         if self.w_win % maze.width != 0:
@@ -49,9 +73,6 @@ class DrawingMaze:
 
 
     def handle_keys(self, keycode, params):
-        colors = [
-
-        ]
         if keycode == 32:
             colors = [
                 0xFFFFFFFF,
@@ -74,8 +95,9 @@ class DrawingMaze:
             self.m.mlx_loop_exit(self.mlx)
         if keycode == 65293:
             print("Restarting...")
-            self.maze.generate()
-            self.draw_cell()
+            self.clear_image()
+            self.m.mlx_loop_hook(self.mlx, loop_hook, [self, self.maze.rand, self.maze])
+            self.m.mlx_loop(self.mlx)
         return 0
 
 
@@ -112,22 +134,23 @@ class DrawingMaze:
                 x += self.cell_size_w
             y += self.cell_size_h
             i += 1
-    
+
 
     def fill_cell(self, x, y, color):
         for i in range(y, y + self.cell_size_h):
             self.draw_line_h(x, x + self.cell_size_w, i, color)
 
+
     def draw_cell(self):
         self.clear_image()
-        for (x, y) in self.maze.protected:
-            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
         self.fill_cell(int(self.maze.entry[0]) * self.cell_size_w,
                        int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
         self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w, 
                        int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
         for y in range(self.maze.height):
             for x in range(self.maze.width):
+                if not self.maze.visited[y][x]:
+                    continue
                 cell = self.maze.grid[y][x]
                 px = x * self.cell_size_w
                 py = y * self.cell_size_h
@@ -139,7 +162,10 @@ class DrawingMaze:
                     self.east(px, py)
                 if (cell >> 3) & 1:
                     self.north(px, py)
+        for (x, y) in self.maze.protected:
+            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
         self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
+        
 
     def clear_image(self):
         for y in range(self.h_win):
@@ -154,10 +180,3 @@ class DrawingMaze:
         print("Exited with ESC ...")
         self.m.mlx_destroy_window(self.mlx, self.win)
         self.m.mlx_loop_exit(self.mlx)
-
-
-class Menu:
-    def __init__(self):
-        self.m = Mlx()
-        self.mlx = self.m.mlx_init()
-        self.win = self.m.mlx_new_window(self.mlx, 480, 360, "MENU")
