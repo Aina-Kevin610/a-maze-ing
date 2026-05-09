@@ -1,9 +1,9 @@
 from maze_generator.maze_gen import Maze
 from render import DrawingMaze
 
-
 def loop_hook(param):
     draw, rand, maze = param
+
     if maze.algo == "hunt_and_kill":
         if draw.maze.phase != "done":
             if not draw.maze.started:
@@ -14,6 +14,7 @@ def loop_hook(param):
             alive = draw.maze.step()
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
+
     elif maze.algo == "backtracking" or maze.algo == "DFS":
         if draw.maze.phase != "done":
             if not draw.maze.started:
@@ -22,13 +23,14 @@ def loop_hook(param):
             alive = draw.maze.step_backtracking()
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
+
     if draw.maze.phase == "done":
         if draw.maze.solve_phase == "idle":
             draw.maze.init_solve()
         if draw.maze.solve_phase not in ("idle", "done"):
             for _ in range(draw.steps_per_frame):
                 draw.maze.step_solve()
-        draw.draw_cell()
+    draw.draw_cell()
 
 def main() -> None:
     maze = Maze()

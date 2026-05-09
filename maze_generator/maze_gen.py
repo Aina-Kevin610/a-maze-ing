@@ -340,6 +340,7 @@ class Maze:
         self.path = []
         self.path_index = 0
 
+
     def step_solve(self):
         if self.solve_phase == "tracing":
             if self.path_index < len(self.path):
