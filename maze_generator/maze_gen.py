@@ -2,26 +2,16 @@ from parsing import parse_config
 from collections import deque
 import random
 import os
-
-
+from .pattern import Pattern
 
 
 class ConfigError(Exception):
     pass
 
 
-pattern = {
-    "42": [
-    [0,1,0,1,0,1,1,1,0,0],
-    [0,1,0,1,0,0,0,1,0,0],
-    [0,1,1,1,0,1,1,1,0,0],
-    [0,0,0,1,0,1,0,0,0,0],
-    [0,0,0,1,0,1,1,1,0,0]
-    ]
-}   
-
 class Maze:
-    def __init__(self, config: dict = parse_config()) -> None:
+    def __init__(self, pattern_="42", config: dict = parse_config()) -> None:
+        self.pattern_ = config.get("PATTERN", pattern_) or pattern_ 
         self.width = int(config["WIDTH"])
         self.height = int(config["HEIGHT"])
         self.entry = config["ENTRY"]
@@ -46,11 +36,10 @@ class Maze:
         self._bfs_queue = None
         self._bfs_parent = None
         self._bfs_end = None
-
         if self.height >= 10 and self.width >= 10:
             self.__init_42()
         else:
-            print("Pattern 42 cannot be contained within the maze! (10 x 10 is requiered)")
+            print(f"Pattern [{self.pattern_}] cannot be contained within the maze! (10 x 10 is requiered)")
         self.rand: random.Random = random.Random()
         if self.seed:
             self.rand = random.Random(self.seed)
@@ -61,9 +50,13 @@ class Maze:
 
 
     def __init_42(self):
+        p = Pattern(self.pattern_)
         x_grid = self.width // 2
         y_grid = self.height // 2
-        pat = pattern["42"]
+        pat = p.create_merged()
+        if not pat or not pat[0]:
+            print(f"Pattern [{self.pattern_}] not recognized, skipping. (must be uppercase or number)")
+            return
         offset_x = len(pat[0]) // 2
         offset_y = len(pat) // 2
         i = 0

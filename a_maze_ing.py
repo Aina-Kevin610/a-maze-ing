@@ -1,5 +1,7 @@
 from maze_generator.maze_gen import Maze
 from render import DrawingMaze
+from maze_generator.pattern import Pattern
+
 
 def loop_hook(param):
     draw, rand, maze = param

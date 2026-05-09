@@ -156,4 +156,6 @@ def parse_config(filename: str = "config.txt") -> dict[str, Any]:
     as_dict = convert_to_dict(validated)
     final = entry_exit(as_dict)
     is_valid(final)
+    if "PATTERN" not in final:
+        final["PATTERN"] = "42"
     return final

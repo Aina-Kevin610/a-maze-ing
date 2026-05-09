@@ -33,8 +33,8 @@ def loop_hook(param):
 
 class DrawingMaze:
     def __init__(self, maze, hexa_maze, wall_color = 0x00FF00FF, bg_color = 0x000000FF) -> None:
-        self.h_win = 360
-        self.w_win = 360
+        self.h_win = 480
+        self.w_win = 480
         self.cell_size_w = self.w_win // maze.width
         self.cell_size_h = self.h_win // maze.height
         if self.w_win % maze.width != 0:
@@ -59,7 +59,7 @@ class DrawingMaze:
         self.m.mlx_hook(self.win, 2, 1, self.handle_keys, [self])
         self.exit_color = 0xFFFF00FF
         self.entry_color = 0xFFFFFFFF
-        self.visited_col = 0x888888FF
+        self.visited_col = 0x4f07f5FF
         self.front_col = 0x00C8FFFF
         self.path_col_start = (0x00, 0xE8, 0x7F)
         self.path_col_end   = (0xFF, 0x40, 0x00)
