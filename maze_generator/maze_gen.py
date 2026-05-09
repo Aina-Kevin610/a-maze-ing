@@ -134,7 +134,6 @@ class Maze:
         self.visited[yn][xn] = True
         return xn, yn, opp
 
-
     def get_neighbors(self, x, y):
         way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         neighbors = []
@@ -145,7 +144,6 @@ class Maze:
             and (xn, yn) not in self.protected:
                 neighbors.append((xn, yn))
         return neighbors
-
 
     def get_visited_neighbors(self, x, y):
         way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
@@ -158,7 +156,6 @@ class Maze:
                 neighbors.append((xn, yn))
         return neighbors
 
-
     def kill(self):
         neighbors = self.get_neighbors(self.current_x, self.current_y)
         if not neighbors:
@@ -168,7 +165,6 @@ class Maze:
             xn, yn = self.rand.choice(neighbors)
         self.current_x, self.current_y, self.wall = self.remove_wall(self.current_x, self.current_y, xn, yn)
         return True
-
 
     def hunt(self):
         i = 0
@@ -184,7 +180,6 @@ class Maze:
                 j += 1
             i += 1
         return None
-
 
     def step(self) -> bool:
         if self.phase == "done":
@@ -204,7 +199,6 @@ class Maze:
             self.phase = "kill"
             return True
         return False
-
 
     def hunt_and_kill(self) -> list[list[str]]:
         print("=== Hunt and Kill ===")
@@ -226,10 +220,7 @@ class Maze:
                 else:
                     self.current_x, self.current_y = result
                     self.phase = "kill"
-        grid = self.hexa_maze()
-        self.save(grid)
-        return grid
-
+        return self.hexa_maze()
 
     def init_backtracking(self):
         x = self.rand.randint(0, self.width - 1)
@@ -257,7 +248,6 @@ class Maze:
             self.stack.pop()
         return True
 
-
     def backtracking(self):
         stack = []
         x = self.rand.randint(0, self.width - 1)
@@ -282,7 +272,6 @@ class Maze:
         self.save(grid)
         return grid
 
-
     def save(self, grid) -> None:
         print("Saving maze in", self.output_file,"...")
         try:
@@ -295,39 +284,56 @@ class Maze:
                 exit_ = str(self.exit).replace("(", "").replace(")", "").replace("'", "")
                 f.write(f"\n{entry}")
                 f.write(f"\n{exit_}")
-                f.write(f"\n{self.path}")
+                if self.path:
+                    directions = self.path_to_directions()
+                    f.write(f"\n{''.join(directions)}")
         except Exception:
             print(f"Error - {self.output_file} not created !")
 
+    def path_to_directions(self):
+        directions = []
+        for i in range(len(self.path) - 1):
+            x1, y1 = self.path[i]
+            x2, y2 = self.path[i + 1]
+            dx = x2 - x1
+            dy = y2 - y1
+            if dx == 1:
+                directions.append("E")
+            elif dx == -1:
+                directions.append("W")
+            elif dy == 1:
+                directions.append("S")
+            elif dy == -1:
+                directions.append("N")
+        return directions
     
-    # def solve(self):
-    #     start = (int(self.entry[0]), int(self.entry[1]))
-    #     end   = (int(self.exit[0]),  int(self.exit[1]))
-    #     queue  = deque([start])
-    #     parent = {start: None}
-    #     while queue:
-    #         cur = queue.popleft()
-    #         if cur == end:
-    #             path, node = [], cur
-    #             while node is not None:
-    #                 path.append(node)
-    #                 node = parent[node]
-    #             self.path = list(reversed(path))
-    #             return
-    #         x, y = cur
-    #         cell = self.grid[y][x]
-    #         for nx, ny, walled in [
-    #             (x-1, y,   cell & 1),
-    #             (x,   y+1, (cell >> 1) & 1),
-    #             (x+1, y,   (cell >> 2) & 1),
-    #             (x,   y-1, (cell >> 3) & 1),
-    #         ]:
-    #             nb = (nx, ny)
-    #             if not walled and nb not in parent:
-    #                 parent[nb] = cur
-    #                 queue.append(nb)
-    #     self.path = []
-
+    def solve(self):
+        start = (int(self.entry[0]), int(self.entry[1]))
+        end   = (int(self.exit[0]),  int(self.exit[1]))
+        queue  = deque([start])
+        parent = {start: None}
+        while queue:
+            cur = queue.popleft()
+            if cur == end:
+                node, path = cur, []
+                while node is not None:
+                    path.append(node)
+                    node = parent[node]
+                self.path = list(reversed(path))
+                return
+            x, y = cur
+            cell = self.grid[y][x]
+            for nx, ny, walled in [
+                (x-1, y,   cell & 1),
+                (x,   y+1, (cell >> 1) & 1),
+                (x+1, y,   (cell >> 2) & 1),
+                (x,   y-1, (cell >> 3) & 1),
+            ]:
+                nb = (nx, ny)
+                if not walled and nb not in parent:
+                    parent[nb] = cur
+                    queue.append(nb)
+        self.path = []
 
     def init_solve(self):
         start = (int(self.entry[0]), int(self.entry[1]))
@@ -339,7 +345,6 @@ class Maze:
         self.solve_phase = "solving"
         self.path = []
         self.path_index = 0
-
 
     def step_solve(self):
         if self.solve_phase == "tracing":
