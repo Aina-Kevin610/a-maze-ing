@@ -28,8 +28,7 @@ def loop_hook(param):
         if draw.maze.solve_phase == "idle":
             draw.maze.init_solve()
         if draw.maze.solve_phase not in ("idle", "done"):
-            for _ in range(draw.steps_per_frame):
-                draw.maze.step_solve()
+            draw.maze.step_solve()
         draw.draw_cell()
 
 class DrawingMaze:
@@ -64,7 +63,6 @@ class DrawingMaze:
         self.front_col = 0x00C8FFFF
         self.path_col_start = (0x00, 0xE8, 0x7F)
         self.path_col_end   = (0xFF, 0x40, 0x00)
-        self.steps_per_frame = 1
 
 
     def my_put_pixel(self, x, y, color):
@@ -160,20 +158,34 @@ class DrawingMaze:
         self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, color)
 
 
+    def blend_color(self, color, alpha):
+        b = (color >> 24) & 0xFF
+        g = (color >> 16) & 0xFF
+        r = (color >> 8)  & 0xFF
+        bg_b = (self.bg_color >> 24) & 0xFF
+        bg_g = (self.bg_color >> 16) & 0xFF
+        bg_r = (self.bg_color >> 8)  & 0xFF
+        nb = int(bg_b + (b - bg_b) * alpha)
+        ng = int(bg_g + (g - bg_g) * alpha)
+        nr = int(bg_r + (r - bg_r) * alpha)
+        return (nb << 24) | (ng << 16) | (nr << 8) | 0xFF
+
+
     def draw_cell(self):
         self.clear_image()
-        self.fill_cell(int(self.maze.entry[0]) * self.cell_size_w,
-                    int(self.maze.entry[1]) * self.cell_size_h, self.entry_color)
-        self.fill_cell(int(self.maze.exit[0]) * self.cell_size_w,
-                    int(self.maze.exit[1]) * self.cell_size_h, self.exit_color)
-        
+        entry = (int(self.maze.entry[0]), int(self.maze.entry[1]))
+        exit_ = (int(self.maze.exit[0]),  int(self.maze.exit[1]))
+        faded_explored = self.blend_color(self.visited_col, 0.3)
         for (x, y) in self.maze.explored:
-            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.visited_col)
+            if (x, y) != entry and (x, y) != exit_:
+                self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, faded_explored)
         for (x, y) in self.maze.frontier:
-            self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.front_col)
+            if (x, y) != entry and (x, y) != exit_:
+                self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, self.front_col)
         total = self.maze.path_index
         for i, (x, y) in enumerate(self.maze.path[:self.maze.path_index]):
-            self.solve_fill_cell(x, y, i, total)
+            if (x, y) != entry and (x, y) != exit_:
+                self.solve_fill_cell(x, y, i, total)
 
         if self.maze.phase != "done":
             self.fill_cell(
@@ -189,24 +201,25 @@ class DrawingMaze:
                 cell = self.maze.grid[y][x]
                 px = x * self.cell_size_w
                 py = y * self.cell_size_h
-                if cell & 1:
-                    self.west(px, py)
-                if (cell >> 1) & 1:
-                    self.south(px, py)
-                if (cell >> 2) & 1:
-                    self.east(px, py)
-                if (cell >> 3) & 1:
-                    self.north(px, py)
+                if cell & 1:       self.west(px, py)
+                if (cell>>1) & 1:  self.south(px, py)
+                if (cell>>2) & 1:  self.east(px, py)
+                if (cell>>3) & 1:  self.north(px, py)
 
         if self.maze.generated:
             for (x, y) in self.maze.protected:
                 self.fill_cell(x * self.cell_size_w, y * self.cell_size_h, 0xFFFFFFFF)
+
+        self.fill_cell(entry[0] * self.cell_size_w, entry[1] * self.cell_size_h, self.entry_color)
+        self.fill_cell(exit_[0] * self.cell_size_w, exit_[1] * self.cell_size_h, self.exit_color)
+
         self.draw_line_h(0, self.w_win, 0, self.wall_color)
         self.draw_line_h(0, self.w_win, self.h_win - 1, self.wall_color)
         self.draw_line_v(0, 0, self.h_win, self.wall_color)
         self.draw_line_v(self.w_win - 1, 0, self.h_win, self.wall_color)
-        self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
-        
+
+        self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)        
+
 
     def clear_image(self):
         for y in range(self.h_win):

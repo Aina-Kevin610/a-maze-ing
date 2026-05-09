@@ -3,7 +3,6 @@ from render import DrawingMaze
 
 def loop_hook(param):
     draw, rand, maze = param
-
     if maze.algo == "hunt_and_kill":
         if draw.maze.phase != "done":
             if not draw.maze.started:
@@ -14,7 +13,6 @@ def loop_hook(param):
             alive = draw.maze.step()
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
-
     elif maze.algo == "backtracking" or maze.algo == "DFS":
         if draw.maze.phase != "done":
             if not draw.maze.started:
@@ -28,15 +26,16 @@ def loop_hook(param):
         if draw.maze.solve_phase == "idle":
             draw.maze.init_solve()
         if draw.maze.solve_phase not in ("idle", "done"):
-            for _ in range(draw.steps_per_frame):
-                draw.maze.step_solve()
+            draw.maze.step_solve()
     draw.draw_cell()
+
 
 def main() -> None:
     maze = Maze()
     draw = DrawingMaze(maze, None, 0xFF000000)
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
     draw.m.mlx_loop(draw.mlx)
+
 
 if __name__ == "__main__":
     main()
