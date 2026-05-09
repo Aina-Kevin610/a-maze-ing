@@ -104,7 +104,7 @@ def is_valid(final: dict[str, Any]) -> None:
         if final["PERFECT"] != "True" and final["PERFECT"] != "False":
             raise ParseError("PERFECT option must be boolean!")
         if not final["ALGO"] in algos:
-            raise ParseError("Unknown parameter for ALGO!")
+            raise ParseError(f"Unknown parameter for ALGO!\nAlgo must be {algos}")
         if len(final["ENTRY"]) != 2 or len(final["EXIT"]) != 2:
             raise ParseError("Invalid ENTRY or EXIT parameter!")
         if 0 < int(final["ENTRY"][1]) >= int(final["WIDTH"]):
