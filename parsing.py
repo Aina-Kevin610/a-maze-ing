@@ -83,7 +83,8 @@ def is_valid(final: dict[str, Any]) -> None:
     algos = [
         "DFS",
         "hunt_and_kill",
-        "backtracking"
+        "backtracking",
+        "prim"
     ]
     try:
         str(final["ALGO"])

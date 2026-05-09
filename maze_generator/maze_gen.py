@@ -90,13 +90,13 @@ class Maze:
     def __init_grid(self) -> list[list[int]]:
         return [[15 for _ in range(self.width)] for _ in range(self.height)]
 
-
-    def generate(self) -> list[list[int]]: 
+    def generate(self) -> list[list[int]]:
         if self.algo == "hunt_and_kill":
             return self.hunt_and_kill()
         elif self.algo == "backtracking" or self.algo == "DFS":
             return self.backtracking()
-
+        elif self.algo == "prim":
+            return self.prim()
 
     def hexa_maze(self) -> list[list[str]]:
         return [[format(self.grid[row][col], 'X') for col in range(self.width)] for row in range(self.height)]
@@ -155,6 +155,55 @@ class Maze:
             and (xn, yn) not in self.protected:
                 neighbors.append((xn, yn))
         return neighbors
+
+
+    def init_prim(self):
+        x = self.rand.randint(0, self.width - 1)
+        y = self.rand.randint(0, self.height - 1)
+        while (x, y) in self.protected:
+            x = self.rand.randint(0, self.width - 1)
+            y = self.rand.randint(0, self.height - 1)
+        self.visited[y][x] = True
+        self.current_x, self.current_y = x, y
+        self._prim_set      = {(x, y)}
+        self.prim_frontier  = [(x, y)]
+        self._expand_prim(x, y)
+
+    def _expand_prim(self, x, y):
+        for dx, dy in [(0,-1),(1,0),(0,1),(-1,0)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < self.width and 0 <= ny < self.height \
+            and not self.visited[ny][nx] \
+            and (nx, ny) not in self.protected \
+            and (nx, ny) not in self._prim_set:
+                self._prim_set.add((nx, ny))
+                self.prim_frontier.append((nx, ny))
+
+    def step_prim(self) -> bool:
+        if not self.prim_frontier:
+            self.phase = "done"
+            self.generated = True
+            return False
+        idx = self.rand.randint(0, len(self.prim_frontier) - 1)
+        x, y = self.prim_frontier.pop(idx)
+        self._prim_set.discard((x, y))
+        self.current_x, self.current_y = x, y
+        visited_nb = self.get_visited_neighbors(x, y)
+        if visited_nb:
+            xn, yn = self.rand.choice(visited_nb)
+            self.remove_wall(x, y, xn, yn)
+            self._expand_prim(x, y)
+        return True
+
+    def prim(self):
+        print("=== Prim ===")
+        self.init_prim()
+        while self.prim_frontier:
+            self.step_prim()
+        grid = self.hexa_maze()
+        self.save(grid)
+        return grid
+
 
     def kill(self):
         neighbors = self.get_neighbors(self.current_x, self.current_y)
