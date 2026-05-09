@@ -36,6 +36,10 @@ class Maze:
         self._bfs_queue = None
         self._bfs_parent = None
         self._bfs_end = None
+        if (self.height >= len(self.pattern_) * 5 or self.width >= len(self.pattern_) * 5 and self.pattern_ != "42") :
+            self.__init_42()
+        else:
+            print(f"Pattern [{self.pattern_}] cannot be contained within the maze! (10 x 10 is requiered)")
         if self.height >= 10 and self.width >= 10:
             self.__init_42()
         else:
