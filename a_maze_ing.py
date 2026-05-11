@@ -44,11 +44,25 @@ def loop_hook(param):
     draw.draw_cell()
 
 
+def print_menu(maze):
+    algo = maze.algo
+    print("╔══════════════════════════════════╗")
+    print("║       A-MAZE-ING  Controls       ║")
+    print("╠══════════════════════════════════╣")
+    print("║  SPACE  → Changer couleur mur    ║")
+    print("║  ENTER  → Régénérer le maze      ║")
+    print("║  ESC    → Quitter                ║")
+    print("╠══════════════════════════════════╣")
+    print(f"║  Algo actif : {algo:<19}║")
+    print("╚══════════════════════════════════╝")
+
+
 def main() -> None:
     maze = Maze()
     draw = DrawingMaze(maze, None, 0xFF000000)
     draw.saved = False
     draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
+    print_menu(maze)
     draw.m.mlx_loop(draw.mlx)
 
 
