@@ -1,81 +1,87 @@
 import os
-from typing import Any
 import random
+from typing import Any
 
 
 class ParseError(Exception):
+
     def __init__(self, msg: str = "Invalid config format!") -> None:
-        self.msg = msg
+        super().__init__(msg)
 
 
 def read_file(filename: str) -> list[str]:
     content: list[str] = []
+
     try:
         if filename != "config.txt":
             raise ParseError("Invalid filename!")
-        f = open(filename, "r")
-        content = f.read().strip().splitlines()
-    except ParseError as e:
-        print("Error - ", e)
+
+        with open(filename, "r", encoding="utf-8") as file:
+            content = file.read().strip().splitlines()
+
+    except ParseError as error:
+        print("Error -", error)
+
     except FileNotFoundError:
         print("Error - File not found!")
-    finally:
-        if f is not None:
-            f.close()
+
     return content
 
 
 def remove_space(content: list[str]) -> list[str]:
-    return [x for x in content if x != '']
+    return [line for line in content if line != ""]
 
 
 def comment_at_first(content: list[str]) -> list[str]:
-    return [x for x in content if x[0] != '#']
+    return [line for line in content if not line.startswith("#")]
 
 
 def comment_at_end(content: list[str]) -> list[list[str]]:
-    stripped = [x.strip() for x in content]
-    split = [x.split("#") for x in stripped]
-    for x in split:
-        lgh = len(x)
-        if lgh >= 2:
-            i = 1
-            while i < lgh:
-                del x[1]
-                i += 1
-    return split
+    stripped = [line.strip() for line in content]
+    split_lines = [line.split("#", maxsplit=1) for line in stripped]
+
+    return split_lines
 
 
 def clean_str(content: list[list[str]]) -> list[str]:
-    result = [str(set(x)) for x in content]
-    result = [x.replace("{", "") for x in result]
-    result = [x.replace("}", "") for x in result]
-    result = [x.replace("'", "") for x in result]
+    result: list[str] = []
+
+    for item in content:
+        cleaned = item[0].strip()
+        result.append(cleaned)
+
     return result
 
 
-def test_len_error(content: list[str]) -> list[tuple[str, ...]]:
-    tuples: list[tuple[str, ...]] = [
-        tuple(x.replace(" ", "").split("=")) for x in content
-    ]
+def test_len_error(content: list[str]) -> list[tuple[str, str]]:
+    tuples: list[tuple[str, str]] = []
+
     try:
-        for x in tuples:
-            if len(x) != 2:
+        for line in content:
+            split_line = line.replace(" ", "").split("=")
+
+            if len(split_line) != 2:
                 raise ParseError("Invalid config format!")
+
+            tuples.append((split_line[0], split_line[1]))
+
         return tuples
-    except ParseError as e:
-        print("Error - ", e)
+
+    except ParseError as error:
+        print("Error -", error)
         os._exit(0)
 
 
-def convert_to_dict(content: list[tuple[str, ...]]) -> dict[str, str]:
-    return {x[0]: x[1].strip() for x in content}
+def convert_to_dict(content: list[tuple[str, str]]) -> dict[str, str]:
+    return {key: value.strip() for key, value in content}
 
 
 def entry_exit(new_content: dict[str, str]) -> dict[str, Any]:
     result: dict[str, Any] = dict(new_content)
+
     result["ENTRY"] = tuple(new_content["ENTRY"].split(","))
     result["EXIT"] = tuple(new_content["EXIT"].split(","))
+
     return result
 
 
@@ -84,78 +90,111 @@ def is_valid(final: dict[str, Any]) -> None:
         "DFS",
         "hunt_and_kill",
         "backtracking",
-        "prim"
+        "prim",
     ]
+
+    mandatory_keys = [
+        "HEIGHT",
+        "WIDTH",
+        "ENTRY",
+        "EXIT",
+        "PERFECT",
+        "OUTPUT_FILE",
+    ]
+
     try:
-        str(final["ALGO"])
-        int(final["ENTRY"][0])
-        int(final["ENTRY"][1])
-        int(final["EXIT"][0])
-        int(final["EXIT"][1])
-        str(final["PERFECT"])
-        if not "ALGO" in final.keys():
+        for key in mandatory_keys:
+            if key not in final:
+                raise ParseError(f"Missing mandatory config [{key}]")
+
+        if "ALGO" not in final:
             final["ALGO"] = random.choice(algos)
-        if not "SEED" in final.keys():
+
+        if "SEED" not in final:
             final["SEED"] = None
-        if int(final["WIDTH"]) < 3 or int(final["HEIGHT"]) < 3:
-            raise ParseError("Too small HEIGHT or WIDTH (minimum:3 x 3)!")
+
+        width = int(final["WIDTH"])
+        height = int(final["HEIGHT"])
+
+        entry_x = int(final["ENTRY"][0])
+        entry_y = int(final["ENTRY"][1])
+
+        exit_x = int(final["EXIT"][0])
+        exit_y = int(final["EXIT"][1])
+
+        if width < 3 or height < 3:
+            raise ParseError(
+                "Too small HEIGHT or WIDTH (minimum: 3 x 3)!"
+            )
+
         if not final["OUTPUT_FILE"].endswith(".txt"):
-            raise ParseError("FILE OUTPUT's extension must be '.txt' !")
-        if final["PERFECT"] != "True" and final["PERFECT"] != "False":
-            raise ParseError("PERFECT option must be boolean!")
-        if not final["ALGO"] in algos:
-            raise ParseError(f"Unknown parameter for ALGO!\nAlgo must be {algos}")
-        if len(final["ENTRY"]) != 2 or len(final["EXIT"]) != 2:
-            raise ParseError("Invalid ENTRY or EXIT parameter!")
-        if 0 < int(final["ENTRY"][1]) >= int(final["WIDTH"]):
+            raise ParseError(
+                "OUTPUT_FILE extension must be '.txt'!"
+            )
+
+        if final["PERFECT"] not in ("True", "False"):
+            raise ParseError(
+                "PERFECT option must be boolean!"
+            )
+
+        if final["ALGO"] not in algos:
+            raise ParseError(
+                f"Unknown parameter for ALGO! "
+                f"Algo must be {algos}"
+            )
+
+        if len(final["ENTRY"]) != 2:
+            raise ParseError("Invalid ENTRY parameter!")
+
+        if len(final["EXIT"]) != 2:
+            raise ParseError("Invalid EXIT parameter!")
+
+        if not (0 <= entry_x < width):
             raise ParseError("Entry point out of range!")
-        if 0 < int(final["ENTRY"][0]) >= int(final["WIDTH"]):
+
+        if not (0 <= entry_y < height):
             raise ParseError("Entry point out of range!")
-        if 0 < int(final["EXIT"][1]) >= int(final["WIDTH"]):
+
+        if not (0 <= exit_x < width):
             raise ParseError("Exit point out of range!")
-        if 0 < int(final["EXIT"][0]) >= int(final["WIDTH"]):
+
+        if not (0 <= exit_y < height):
             raise ParseError("Exit point out of range!")
-        if 0 < int(final["ENTRY"][1]) > int(final["HEIGHT"]):
-            raise ParseError("Entry point out of range!")
-        if 0 < int(final["ENTRY"][0]) > int(final["HEIGHT"]):
-            raise ParseError("Entry point out of range!")
-        if 0 < int(final["EXIT"][1]) > int(final["HEIGHT"]):
-            raise ParseError("Exit point out of range!")
-        if 0 < int(final["EXIT"][0]) > int(final["HEIGHT"]):
-            raise ParseError("Exit point out of range!")
+
         if final["ENTRY"] == final["EXIT"]:
-            raise ParseError("ENTRY and EXIT at the position!")
-        if not "HEIGHT" in final.keys():
-            raise ParseError("Missing mandatory config [HEIGHT]")
-        if not "EXIT" in final.keys():
-            raise ParseError("Missing mandatory config [EXIT]")
-        if not "ENTRY" in final.keys():
-            raise ParseError("Missing mandatory config [ENTRY]")
-        if not "PERFECT" in final.keys():
-            raise ParseError("Missing mandatory config [PERFECT]")
-        if not "OUTPUT_FILE" in final.keys():
-            raise ParseError("Missing mandatory config [OUTPUT_FILE]")
-    except Exception as e:
-        print("Error - ", e)
+            raise ParseError(
+                "ENTRY and EXIT cannot be at the same position!"
+            )
+
+    except (ValueError, ParseError) as error:
+        print("Error -", error)
         os._exit(0)
 
 
-def parse_config(filename: str = "config.txt") -> dict[str, Any]:
+def parse_config(
+    filename: str = "config.txt",
+) -> dict[str, Any]:
     content = read_file(filename)
+
     no_space = remove_space(content)
-    no_cmt1 = comment_at_first(no_space)
-    no_cmt2 = comment_at_end(no_cmt1)
-    cleaned = clean_str(no_cmt2)
+    no_comment_start = comment_at_first(no_space)
+    no_comment_end = comment_at_end(no_comment_start)
+
+    cleaned = clean_str(no_comment_end)
+
     validated = test_len_error(cleaned)
-    try:
-        if len(validated) < 6:
-            raise ParseError("Missing mandatory parameter!")
-    except ParseError as e:
-        print("Error - ", e)
+
+    if len(validated) < 6:
+        print("Error - Missing mandatory parameter!")
         os._exit(0)
+
     as_dict = convert_to_dict(validated)
+
     final = entry_exit(as_dict)
+
     is_valid(final)
+
     if "PATTERN" not in final:
         final["PATTERN"] = "42"
+
     return final

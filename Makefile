@@ -1,11 +1,10 @@
 PYTHON     = python3
 VENV       = .venv
+ACTIVATE   = $(VENV)/bin/activate
 PIP        = $(VENV)/bin/pip
 EXEC       = $(VENV)/bin/python
-RUFF       = $(VENV)/bin/ruff
-PYTEST     = $(VENV)/bin/pytest
 MAIN       = a_maze_ing.py
-SRC        = a_maze_ing.py parsing.py maze_gen.py render.py
+SRC        = a_maze_ing.py parsing.py maze_generator/maze_gen.py render.py
 
 run: install
 	$(EXEC) $(MAIN)
@@ -15,16 +14,24 @@ install: $(VENV)/bin/activate
 $(VENV)/bin/activate:
 	$(PYTHON) -m venv $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install -r
+	$(PIP) install mlx-2.2-py3-none-any.whl
+
+venv: install
+
 
 debug: install
 	$(EXEC) -m pdb $(MAIN)
 
 lint: install
-	$(RUFF) check --select ALL $(SRC)
+	echo "Running flake8..."
+	flake8 $(SRC)
+	echo "Running mypy..."
+	mypy $(SRC)
 
-test: install
-	$(PYTEST) tests/
+lint-strict:
+	echo "Running strict linting..."
+	flake8 $(SRC)
+	mypy $(SRC) --strict
 
 clean:
 	find . -type f -name "*.pyc" -delete
@@ -36,4 +43,4 @@ fclean: clean
 
 re: fclean install
 
-.PHONY: help install run debug lint test clean fclean re
+.PHONY: install run debug lint lint-strict clean fclean re
