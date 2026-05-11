@@ -1,0 +1,84 @@
+"""Terminal entry point for A-MAZE-ING."""
+
+from typing import Any
+
+from maze_generator.maze_gen import Maze
+from render_terminal import TerminalDrawingMaze
+
+
+def loop_hook(param: list[Any]) -> None:
+    draw: TerminalDrawingMaze = param[0]
+    maze: Maze                = param[2]
+
+    # ── regeneration ─────────────────────────────────────────
+    if draw.regenerate:
+        draw.maze        = Maze()
+        draw.saved       = False
+        draw.regenerate  = False
+        param[1]         = draw.maze.rand
+        param[2]         = draw.maze
+        maze             = draw.maze
+        draw.maze.explored.clear()
+        draw.maze.frontier.clear()
+        draw.maze.path.clear()
+        draw.maze.path_index = 0
+        return
+
+    rand = param[1]
+    maze = param[2]
+
+    # ── generation step ──────────────────────────────────────
+    if maze.algo == "hunt_and_kill":
+        if draw.maze.phase != "done":
+            if not draw.maze.started:
+                draw.maze.current_x = rand.randint(0, draw.maze.width - 1)
+                draw.maze.current_y = rand.randint(0, draw.maze.height - 1)
+                draw.maze.visited[draw.maze.current_y][draw.maze.current_x] = True
+                draw.maze.started = True
+            alive = draw.maze.step()
+            if not alive:
+                draw.maze.save(draw.maze.hexa_maze())
+
+    elif maze.algo == "prim":
+        if draw.maze.phase != "done":
+            if not draw.maze.started:
+                draw.maze.init_prim()
+                draw.maze.started = True
+            alive = draw.maze.step_prim()
+            if not alive:
+                draw.maze.save(draw.maze.hexa_maze())
+
+    elif maze.algo in ("backtracking", "DFS"):
+        if draw.maze.phase != "done":
+            if not draw.maze.started:
+                draw.maze.init_backtracking()
+                draw.maze.started = True
+            alive = draw.maze.step_backtracking()
+            if not alive:
+                draw.maze.save(draw.maze.hexa_maze())
+
+    # ── solve step ───────────────────────────────────────────
+    if draw.maze.phase == "done":
+        if draw.maze.solve_phase == "idle":
+            draw.maze.init_solve()
+
+        if draw.maze.solve_phase not in ("idle", "done"):
+            draw.maze.step_solve()
+
+        if draw.maze.solve_phase == "done" and not draw.saved:
+            draw.maze.solve()
+            draw.maze.save(draw.maze.hexa_maze())
+            draw.saved = True
+
+    draw.draw_cell()
+
+
+def main() -> None:
+    maze  = Maze()
+    draw  = TerminalDrawingMaze(maze)
+    param: list[Any] = [draw, maze.rand, maze]
+    draw.run(loop_hook, param, fps=60)
+
+
+if __name__ == "__main__":
+    main()

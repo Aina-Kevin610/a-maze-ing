@@ -406,13 +406,6 @@ class DrawingMaze:
                 if (cell >> 3) & 1:
                     self.north(px, py)
 
-        if self.maze.phase != "done":
-            self.fill_cell(
-                self.maze.current_x * self.cell_size_w,
-                self.maze.current_y * self.cell_size_h,
-                0xFF6600FF,
-            )
-
         if self.maze.generated:
             for x, y in self.maze.protected:
                 self.fill_cell(
@@ -432,6 +425,13 @@ class DrawingMaze:
             exit_[1] * self.cell_size_h,
             self.exit_color,
         )
+
+        if self.maze.phase != "done":
+            self.fill_cell(
+                self.maze.current_x * self.cell_size_w,
+                self.maze.current_y * self.cell_size_h,
+                0xFF6600FF,
+            )
 
         self.draw_line_h(
             0,
@@ -468,7 +468,7 @@ class DrawingMaze:
             0,
             0,
         )
-    
+          
         self.fill_cell(
             entry[0] * self.cell_size_w,
             entry[1] * self.cell_size_h,
