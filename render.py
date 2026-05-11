@@ -7,51 +7,45 @@ from mlx import Mlx
 from maze_generator.maze_gen import Maze
 
 
-def loop_hook(param: list[Any]) -> None:
+def loop_hook(param):
     draw, rand, maze = param
 
     if maze.algo == "hunt_and_kill":
         if draw.maze.phase != "done":
             if not draw.maze.started:
-                draw.maze.current_x = rand.randint(
-                    0,
-                    draw.maze.width - 1,
-                )
-                draw.maze.current_y = rand.randint(
-                    0,
-                    draw.maze.height - 1,
-                )
-
-                draw.maze.visited[
-                    draw.maze.current_y
-                ][draw.maze.current_x] = True
-
+                draw.maze.current_x = rand.randint(0, draw.maze.width - 1)
+                draw.maze.current_y = rand.randint(0, draw.maze.height - 1)
+                draw.maze.visited[draw.maze.current_y][draw.maze.current_x] = True
                 draw.maze.started = True
-
             alive = draw.maze.step()
-
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
-
-    elif maze.algo in ("backtracking", "DFS"):
+    elif maze.algo == "prim":
+        if draw.maze.phase != "done":
+            if not draw.maze.started:
+                draw.maze.init_prim()
+                draw.maze.started = True
+            alive = draw.maze.step_prim()
+            if not alive:
+                draw.maze.save(draw.maze.hexa_maze())
+    elif maze.algo == "backtracking" or maze.algo == "DFS":
         if draw.maze.phase != "done":
             if not draw.maze.started:
                 draw.maze.init_backtracking()
                 draw.maze.started = True
-
             alive = draw.maze.step_backtracking()
-
             if not alive:
                 draw.maze.save(draw.maze.hexa_maze())
-
     if draw.maze.phase == "done":
         if draw.maze.solve_phase == "idle":
             draw.maze.init_solve()
-
         if draw.maze.solve_phase not in ("idle", "done"):
             draw.maze.step_solve()
-
-        draw.draw_cell()
+        if draw.maze.solve_phase == "done" and not draw.saved:
+            draw.maze.solve()
+            draw.maze.save(draw.maze.hexa_maze())
+            draw.saved = True
+    draw.draw_cell()
 
 
 class DrawingMaze:
@@ -202,6 +196,7 @@ class DrawingMaze:
             print("Regenerating...")
 
             self.maze = Maze()
+            self.saved = False
 
             self.clear_image()
 
@@ -266,19 +261,6 @@ class DrawingMaze:
             y + self.cell_size_h,
             self.wall_color,
         )
-
-    def draw_grid(self) -> None:
-        y_pos = 0
-
-        for _y in range(self.maze.height):
-            x_pos = 0
-
-            for _x in range(self.maze.width):
-                self.draw_cell()
-
-                x_pos += self.cell_size_w
-
-            y_pos += self.cell_size_h
 
     def fill_cell(
         self,
@@ -392,7 +374,7 @@ class DrawingMaze:
         total = self.maze.path_index
 
         for i, (x, y) in enumerate(
-            self.maze.path[:self.maze.path_index]
+            self.maze.path[: self.maze.path_index]
         ):
             if (x, y) not in (entry, exit_):
                 self.solve_fill_cell(
@@ -401,15 +383,6 @@ class DrawingMaze:
                     i,
                     total,
                 )
-
-        if self.maze.phase != "done":
-            self.fill_cell(
-                self.maze.current_x
-                * self.cell_size_w,
-                self.maze.current_y
-                * self.cell_size_h,
-                0xFF6600FF,
-            )
 
         for y in range(self.maze.height):
             for x in range(self.maze.width):
@@ -433,6 +406,13 @@ class DrawingMaze:
                 if (cell >> 3) & 1:
                     self.north(px, py)
 
+        if self.maze.phase != "done":
+            self.fill_cell(
+                self.maze.current_x * self.cell_size_w,
+                self.maze.current_y * self.cell_size_h,
+                0xFF6600FF,
+            )
+
         if self.maze.generated:
             for x, y in self.maze.protected:
                 self.fill_cell(
@@ -441,6 +421,54 @@ class DrawingMaze:
                     0xFFFFFFFF,
                 )
 
+        self.fill_cell(
+            entry[0] * self.cell_size_w,
+            entry[1] * self.cell_size_h,
+            self.entry_color,
+        )
+
+        self.fill_cell(
+            exit_[0] * self.cell_size_w,
+            exit_[1] * self.cell_size_h,
+            self.exit_color,
+        )
+
+        self.draw_line_h(
+            0,
+            self.w_win,
+            0,
+            self.wall_color,
+        )
+
+        self.draw_line_h(
+            0,
+            self.w_win,
+            self.h_win - 1,
+            self.wall_color,
+        )
+
+        self.draw_line_v(
+            0,
+            0,
+            self.h_win,
+            self.wall_color,
+        )
+
+        self.draw_line_v(
+            self.w_win - 1,
+            0,
+            self.h_win,
+            self.wall_color,
+        )
+
+        self.m.mlx_put_image_to_window(
+            self.mlx,
+            self.win,
+            self.img,
+            0,
+            0,
+        )
+    
         self.fill_cell(
             entry[0] * self.cell_size_w,
             entry[1] * self.cell_size_h,

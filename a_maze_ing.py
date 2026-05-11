@@ -44,18 +44,43 @@ def loop_hook(param):
     draw.draw_cell()
 
 
-def print_menu(maze):
-    algo = maze.algo
-    print("╔══════════════════════════════════╗")
-    print("║       A-MAZE-ING  Controls       ║")
-    print("╠══════════════════════════════════╣")
-    print("║  SPACE  → Changer couleur mur    ║")
-    print("║  ENTER  → Régénérer le maze      ║")
-    print("║  ESC    → Quitter                ║")
-    print("╠══════════════════════════════════╣")
-    print(f"║  Algo actif : {algo:<19}║")
-    print("╚══════════════════════════════════╝")
+def print_menu(maze) -> None:
+    w = 50
+    border = "═" * (w - 2)
 
+    def row(label: str, value: str) -> str:
+        content = f"  {label:<18}{value}"
+        return f"║ {content:<{w - 4}} ║"
+
+    def section(title: str) -> str:
+        return f"╠{'═' * (w - 2)}╣\n║ {title.center(w - 4)} ║"
+
+    seed_str   = str(maze.seed) if maze.seed is not None else "random"
+    entry_str  = f"({maze.entry[0]}, {maze.entry[1]})"
+    exit_str   = f"({maze.exit[0]}, {maze.exit[1]})"
+    perfect    = "yes" if maze.perfect else "no"
+    pattern    = maze.pattern_ or "none"
+
+    lines = [
+        f"╔{border}╗",
+        f"║{'A-MAZE-ING'.center(w - 2)}║",
+        section("=== Maze configuration ==="),
+        row("Algorithm :",   maze.algo),
+        row("Size :",        f"{maze.width} x {maze.height}"),
+        row("Entry :",       entry_str),
+        row("Exit :",        exit_str),
+        row("Perfect :",     perfect),
+        row("Pattern :",     pattern),
+        row("Seed :",        seed_str),
+        row("Output file :", maze.output_file),
+        section("=== Controls ==="),
+        row("SPACE","→ change wall color"),
+        row("ENTER","→ regenerate maze"),
+        row("ESC",  "→ quit"),
+        f"╚{border}╝",
+    ]
+
+    print("\n".join(lines))
 
 def main() -> None:
     maze = Maze()
