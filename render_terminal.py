@@ -8,21 +8,16 @@ from typing import Any
 
 from maze_generator.maze_gen import Maze
 
-
-
 RESET       = "\033[0m"
 HIDE_CURSOR = "\033[?25l"
 SHOW_CURSOR = "\033[?25h"
 CLEAR       = "\033[H\033[2J"
 
-
 def _fg(r: int, g: int, b: int) -> str:
     return f"\033[38;2;{r};{g};{b}m"
 
-
 def _bg(r: int, g: int, b: int) -> str:
     return f"\033[48;2;{r};{g};{b}m"
-
 
 def _lerp(a: int, b: int, t: float) -> int:
     return int(a + (b - a) * t)
@@ -51,19 +46,17 @@ _COL_EXPLORED  = _bg(
 )
 _COL_ENTRY     = _bg(255, 255, 255) + _fg(0, 0, 0)
 _COL_EXIT      = _bg(0,   255, 255) + _fg(0, 0, 0)
-_COL_PROTECTED = _bg(180, 180, 180) + _fg(0, 0, 0)
+# ⬇️ Fond blanc + texte noir pour une bonne lisibilité en terminal
+_COL_PROTECTED = _bg(255, 255, 255) + _fg(0, 0, 0)
 
 _PATH_START = (0x7F, 0xE8, 0x00)
 _PATH_END   = (0x00, 0x40, 0xFF)
-
 
 def _path_bg(t: float) -> str:
     r = _lerp(_PATH_START[0], _PATH_END[0], t)
     g = _lerp(_PATH_START[1], _PATH_END[1], t)
     b = _lerp(_PATH_START[2], _PATH_END[2], t)
     return _bg(r, g, b)
-
-
 
 class TerminalDrawingMaze:
 
@@ -74,7 +67,6 @@ class TerminalDrawingMaze:
         self._running    = True
         self._wall_color = _WALL_COLORS[0]
         self._path_map:  dict[tuple[int, int], int] = {}
-
 
     def _col_wall(self) -> str:
         return _fg(*self._wall_color)
@@ -100,14 +92,18 @@ class TerminalDrawingMaze:
             return _COL_ENTRY
         if pos == exit_:
             return _COL_EXIT
+        
+        # ⬇️ MODIFICATION : vérifie explicitement que la génération est terminée
+        if self.maze.phase == "done" and pos in self.maze.protected:
+            return _COL_PROTECTED
+
         if (
             self.maze.phase != "done"
             and x == self.maze.current_x
             and y == self.maze.current_y
         ):
             return _COL_CURRENT
-        if self.maze.generated and pos in self.maze.protected:
-            return _COL_PROTECTED
+
         if pos in self._path_map:
             total = max(self.maze.path_index - 1, 1)
             t = self._path_map[pos] / total
@@ -117,7 +113,6 @@ class TerminalDrawingMaze:
         if pos in self.maze.explored:
             return _COL_EXPLORED
         return ""
-
 
     def draw_cell(self) -> None:
         maze = self.maze
@@ -167,7 +162,6 @@ class TerminalDrawingMaze:
         sys.stdout.write(CLEAR + "\r\n".join(lines) + "\r\n")
         sys.stdout.flush()
 
-
     def _read_keys(self) -> None:
         fd  = sys.stdin.fileno()
         old = termios.tcgetattr(fd)
@@ -184,7 +178,6 @@ class TerminalDrawingMaze:
                     self._running = False
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old)
-
 
     def run(
         self,

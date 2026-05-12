@@ -1,4 +1,3 @@
-"""Maze generation and solving module."""
 from collections import deque
 import random
 import os

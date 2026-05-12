@@ -5,6 +5,8 @@ PIP        = $(VENV)/bin/pip
 EXEC       = $(VENV)/bin/python
 MAIN       = a_maze_ing.py
 SRC        = a_maze_ing.py parsing.py maze_generator/maze_gen.py render.py
+C          ?= "feat" 
+
 
 run: install
 	$(EXEC) $(MAIN)
@@ -17,6 +19,12 @@ $(VENV)/bin/activate:
 	$(PIP) install mlx-2.2-py3-none-any.whl
 
 venv: install
+
+
+send:
+	git add .
+	git commit -m "$(C)"
+	git push
 
 
 debug: install
