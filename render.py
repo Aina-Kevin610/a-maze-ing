@@ -98,6 +98,7 @@ class DrawingMaze:
         if not self.img:
             sys.exit(0)
 
+        self.show_path = True
         self.wall_color = wall_color
         self.bg_color = bg_color
 
@@ -181,6 +182,9 @@ class DrawingMaze:
             self.wall_color = random.choice(colors)
 
             self.draw_cell()
+
+        if keycode == 112:
+            self.show_path = not self.show_path
 
         if keycode == 65307:
             print("Exited with ESC ...")
@@ -373,16 +377,12 @@ class DrawingMaze:
 
         total = self.maze.path_index
 
-        for i, (x, y) in enumerate(
-            self.maze.path[: self.maze.path_index]
-        ):
-            if (x, y) not in (entry, exit_):
-                self.solve_fill_cell(
-                    x,
-                    y,
-                    i,
-                    total,
-                )
+        if self.show_path:
+            for i, (x, y) in enumerate(
+                self.maze.path[: self.maze.path_index]
+            ):
+                if (x, y) not in (entry, exit_):
+                    self.solve_fill_cell(x, y, i, total)
 
         for y in range(self.maze.height):
             for x in range(self.maze.width):

@@ -47,7 +47,7 @@ _COL_EXPLORED  = _bg(
 _COL_ENTRY     = _bg(255, 255, 255) + _fg(0, 0, 0)
 _COL_EXIT      = _bg(0,   255, 255) + _fg(0, 0, 0)
 # ⬇️ Fond blanc + texte noir pour une bonne lisibilité en terminal
-_COL_PROTECTED = _bg(255, 255, 255) + _fg(0, 0, 0)
+_COL_PROTECTED = _bg(255, 255, 255) + _fg(225, 225, 225)
 
 _PATH_START = (0x7F, 0xE8, 0x00)
 _PATH_END   = (0x00, 0x40, 0xFF)

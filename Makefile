@@ -5,11 +5,12 @@ PIP        = $(VENV)/bin/pip
 EXEC       = $(VENV)/bin/python
 MAIN       = a_maze_ing.py
 SRC        = a_maze_ing.py parsing.py maze_generator/maze_gen.py render.py
-C          ?= "feat" 
-
+C          ?= "feat"
+FILENAME   = "config.txt"
+WHL        = maze_generator-1.0.0-py3-none-any.whl
 
 run: install
-	$(EXEC) $(MAIN)
+	$(EXEC) $(MAIN) $(FILENAME)
 
 install: $(VENV)/bin/activate
 
@@ -40,6 +41,12 @@ lint-strict:
 	echo "Running strict linting..."
 	flake8 $(SRC)
 	mypy $(SRC) --strict
+
+
+build: install
+	$(PIP) install build
+	$(EXEC) -m build --wheel
+	mv dist/$(WHL) .
 
 clean:
 	find . -type f -name "*.pyc" -delete

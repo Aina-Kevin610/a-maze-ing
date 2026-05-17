@@ -15,10 +15,8 @@ class Maze:
     def __init__(
         self,
         pattern_: str = "42",
-        config: Optional[dict[str, Any]] = None,
     ) -> None:
-        if config is None:
-            config = parse_config()
+        config = parse_config()
 
         self.pattern_: str = config.get("PATTERN", pattern_) or pattern_
         self.width: int = int(config["WIDTH"])
@@ -26,7 +24,7 @@ class Maze:
         self.entry: tuple[str, str] = config["ENTRY"]
         self.exit: tuple[str, str] = config["EXIT"]
         self.output_file: str = config["OUTPUT_FILE"]
-        self.perfect: bool = config["PERFECT"]
+        self.perfect: bool = config["PERFECT"] == "True"
         self.algo: str = config["ALGO"]
         self.grid: list[list[int]] = self.__init_grid()
         self.visited: list[list[bool]] = self.__init_visited()
@@ -139,6 +137,20 @@ class Maze:
     def __init_visited(self) -> list[list[bool]]:
         return [[False for _ in range(self.width)] for _ in range(self.height)]
 
+    def _make_imperfect(self, rate: float = 0.15) -> None:
+        for y in range(self.height):
+            for x in range(self.width):
+                if (x, y) in self.protected:
+                    continue
+                if x + 1 < self.width and (x + 1, y) not in self.protected:
+                    if self.rand.random() < rate:
+                        self.grid[y][x] &= ~(1 << 2)
+                        self.grid[y][x + 1] &= ~(1 << 0)
+                if y + 1 < self.height and (x, y + 1) not in self.protected:
+                    if self.rand.random() < rate:
+                        self.grid[y][x] &= ~(1 << 1)
+                        self.grid[y + 1][x] &= ~(1 << 3)
+
     def remove_wall(
         self, x: int, y: int, xn: int, yn: int
     ) -> tuple[int, int, int]:
@@ -220,6 +232,8 @@ class Maze:
         if not self.prim_frontier:
             self.phase = "done"
             self.generated = True
+            if not self.perfect:
+                self._make_imperfect()
             return False
         idx = self.rand.randint(0, len(self.prim_frontier) - 1)
         x, y = self.prim_frontier.pop(idx)
@@ -280,6 +294,8 @@ class Maze:
             if result is None:
                 self.phase = "done"
                 self.generated = True
+                if not self.perfect:
+                    self._make_imperfect()
                 return False
             self.current_x, self.current_y = result
             self.phase = "kill"
@@ -322,6 +338,8 @@ class Maze:
         if not self.stack:
             self.phase = "done"
             self.generated = True
+            if not self.perfect:
+                self._make_imperfect()
             return False
         x, y = self.stack[-1]
         self.current_x, self.current_y = x, y
@@ -354,6 +372,8 @@ class Maze:
             else:
                 stack.pop()
         self.generated = True
+        if not self.perfect:
+            self._make_imperfect()
         grid = self.hexa_maze()
         self.save(grid)
         return grid
