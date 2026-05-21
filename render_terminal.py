@@ -1,47 +1,6 @@
-
-# def print_menu(maze) -> None:
-#     w = 50
-#     border = "═" * (w - 2)
-
-#     def row(label: str, value: str) -> str:
-#         content = f"  {label:<18}{value}"
-#         return f"║ {content:<{w - 4}} ║"
-
-#     def section(title: str) -> str:
-#         return f"╠{'═' * (w - 2)}╣\n║ {title.center(w - 4)} ║"
-
-#     seed_str   = str(maze.seed) if maze.seed is not None else "random"
-#     entry_str  = f"({maze.entry[0]}, {maze.entry[1]})"
-#     exit_str   = f"({maze.exit[0]}, {maze.exit[1]})"
-#     perfect    = "yes" if maze.perfect else "no"
-#     pattern    = maze.pattern_ or "none"
-
-#     lines = [
-#         f"╔{border}╗",
-#         f"║{'A-MAZE-ING'.center(w - 2)}║",
-#         section("=== Maze configuration ==="),
-#         row("Algorithm :",   maze.algo),
-#         row("Size :",        f"{maze.width} x {maze.height}"),
-#         row("Entry :",       entry_str),
-#         row("Exit :",        exit_str),
-#         row("Perfect :",     perfect),
-#         row("Pattern :",     pattern),
-#         row("Seed :",        seed_str),
-#         row("Output file :", maze.output_file),
-#         section("=== Controls ==="),
-#         row("SPACE","→ change wall color"),
-#         row("ENTER","→ regenerate maze"),
-#         row("P",  "→ show/hide path"),
-#         row("ESC",  "→ quit"),
-#         f"╚{border}╝",
-#     ]
-
-#     print("\n".join(lines))
-
-
-
 import time
 import sys
+
 
 RED     = "\033[91m"
 GREEN   = "\033[92m"
@@ -50,6 +9,7 @@ BLUE    = "\033[94m"
 MAGENTA = "\033[95m"
 CYAN    = "\033[96m"
 RESET   = "\033[0m"
+
 
 def loading():
     frames = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]
@@ -62,7 +22,25 @@ def loading():
     sys.stdout.write(f"\r{CYAN}✓{RESET} Done!              \n")
 
 
+def box(msg: str | list[str], label: str, color: str) -> None:
+    w = 50
+    prefix = "┏━━━━━━━━━━>>>"
+    suffix = "<<<"
+    dashes = "━" * (w - len(prefix) - len(label) - len(suffix) - 1)
+    header = f"{prefix}{label}{suffix}{dashes}┓"
 
-def print_menu(error: str) -> None:
+    if isinstance(msg, str):
+        msgs = [msg]
+    else:
+        msgs = msg
+
+    lines = [f"{color}{header}{RESET}"]
+    for m in msgs:
+        lines.append(f"{color}┃{RESET}  {m:<{w - 6}}  {color}┃{RESET}")
+    lines.append(f"{color}┗{'━' * (w - 2)}┛{RESET}")
+
+    print("\n".join(lines))
+
+def print_menu(maze) -> None:
     loading()
-    print("Menu here")
+    box(["hello", "mf", "bla"], "faillure", RED)
