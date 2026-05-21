@@ -41,6 +41,7 @@ def box(msg: str | list[str], label: str, color: str) -> None:
 
     print("\n".join(lines))
 
-def print_menu(maze) -> None:
+def print_box(maze, [param]) -> None:
+    mess, label, color = param
     loading()
-    box(["hello", "mf", "bla"], "faillure", RED)
+    box(mess, label, color)

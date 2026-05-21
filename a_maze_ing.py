@@ -1,7 +1,7 @@
 from maze_generator.maze_gen import Maze
 from render import DrawingMaze
 import sys
-from render_terminal import print_menu
+from render_terminal import print_box
 
 
 def loop_hook(param):
@@ -57,13 +57,27 @@ def loop_hook(param):
         sys.exit(0)
 
 
+RED     = "\033[91m"
+GREEN   = "\033[92m"
+YELLOW  = "\033[93m"
+BLUE    = "\033[94m"
+MAGENTA = "\033[95m"
+CYAN    = "\033[96m"
+RESET   = "\033[0m"
+
+
 def main() -> None:
+    mess = [
+        "P    show/hide path",
+        "Enter    regenerate",
+        "Space    change wall color"
+    ]
     try:
         maze = Maze()
         draw = DrawingMaze(maze, None, 0xFF000000)
         draw.saved = False
         draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
-        print_menu(maze)
+        print_box(maze, [mess, "menu", GREEN])
         draw.m.mlx_loop(draw.mlx)
     except KeyboardInterrupt as e:
         print("Program interupted - ", e)
