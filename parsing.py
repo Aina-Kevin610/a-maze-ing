@@ -1,6 +1,7 @@
 import os
 import random
 from typing import Any
+from render_terminal import print_menu
 
 
 class ParseError(Exception):

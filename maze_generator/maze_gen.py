@@ -126,8 +126,15 @@ class Maze:
         return self.grid
 
     def hexa_maze(self) -> list[list[str]]:
+        def remap(v: int) -> int:
+            west  = (v >> 0) & 1
+            south = (v >> 1) & 1
+            east  = (v >> 2) & 1
+            north = (v >> 3) & 1
+            return (north << 0) | (east << 1) | (south << 2) | (west << 3)
+
         return [
-            [format(self.grid[row][col], "X") for col in range(self.width)]
+            [format(remap(self.grid[row][col]), "X") for col in range(self.width)]
             for row in range(self.height)
         ]
 
