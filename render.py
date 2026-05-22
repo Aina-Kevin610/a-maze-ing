@@ -3,8 +3,18 @@ import sys
 from typing import Any
 
 from mlx import Mlx
-
+from render_terminal import print_box
 from maze_generator.maze_gen import Maze
+
+
+RED     = "\033[91m"
+GREEN   = "\033[92m"
+YELLOW  = "\033[93m"
+BLUE    = "\033[94m"
+MAGENTA = "\033[95m"
+CYAN    = "\033[96m"
+RESET   = "\033[0m"
+
 
 
 def loop_hook(param):
@@ -177,7 +187,7 @@ class DrawingMaze:
                 0xB22222FF,
             ]
 
-            print("Changing wall color...")
+            print_box([None, "Changing wall color...", "Action", MAGENTA])
 
             self.wall_color = random.choice(colors)
 
@@ -187,7 +197,7 @@ class DrawingMaze:
             self.show_path = not self.show_path
 
         if keycode == 65307:
-            print("Exited with ESC ...")
+            print_box([None, "Exited with ESC ...", "Action", MAGENTA])
 
             self.m.mlx_destroy_window(
                 self.mlx,
@@ -197,7 +207,7 @@ class DrawingMaze:
             self.m.mlx_loop_exit(self.mlx)
 
         if keycode == 65293:
-            print("Regenerating...")
+            print_box([None, "Regenerating...", "Action", MAGENTA])
 
             self.maze = Maze()
             self.saved = False
@@ -303,9 +313,10 @@ class DrawingMaze:
             | 0xFF
         )
 
-        self.fill_cell(
-            x * self.cell_size_w,
-            y * self.cell_size_h,
+        self.fill_circle(
+            x * self.cell_size_w + self.cell_size_w // 2,
+            y * self.cell_size_h + self.cell_size_h // 2,
+            min(self.cell_size_w, self.cell_size_h) // 4,
             color,
         )
 
@@ -340,6 +351,19 @@ class DrawingMaze:
             | (new_red << 8)
             | 0xFF
         )
+
+    def fill_circle(
+        self,
+        cx: int,
+        cy: int,
+        r: int,
+        color: int,
+    ) -> None:
+        for y in range(cy - r, cy + r + 1):
+            for x in range(cx - r, cx + r + 1):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
+                    self.my_put_pixel(x, y, color)
+
 
     def draw_cell(self) -> None:
         self.clear_image()
@@ -414,15 +438,17 @@ class DrawingMaze:
                     0xFFFFFFFF,
                 )
 
-        self.fill_cell(
-            entry[0] * self.cell_size_w,
-            entry[1] * self.cell_size_h,
+        self.fill_circle(
+            entry[0] * self.cell_size_w + self.cell_size_w // 2,
+            entry[1] * self.cell_size_h + self.cell_size_h // 2,
+            min(self.cell_size_w, self.cell_size_h) // 2 - 1,
             self.entry_color,
         )
 
-        self.fill_cell(
-            exit_[0] * self.cell_size_w,
-            exit_[1] * self.cell_size_h,
+        self.fill_circle(
+            exit_[0] * self.cell_size_w + self.cell_size_w // 2,
+            exit_[1] * self.cell_size_h + self.cell_size_h // 2,
+            min(self.cell_size_w, self.cell_size_h) // 2 - 1,
             self.exit_color,
         )
 
@@ -433,89 +459,12 @@ class DrawingMaze:
                 0xFF6600FF,
             )
 
-        self.draw_line_h(
-            0,
-            self.w_win,
-            0,
-            self.wall_color,
-        )
+        self.draw_line_h(0, self.w_win, 0, self.wall_color)
+        self.draw_line_h(0, self.w_win, self.h_win - 1, self.wall_color)
+        self.draw_line_v(0, 0, self.h_win, self.wall_color)
+        self.draw_line_v(self.w_win - 1, 0, self.h_win, self.wall_color)
 
-        self.draw_line_h(
-            0,
-            self.w_win,
-            self.h_win - 1,
-            self.wall_color,
-        )
-
-        self.draw_line_v(
-            0,
-            0,
-            self.h_win,
-            self.wall_color,
-        )
-
-        self.draw_line_v(
-            self.w_win - 1,
-            0,
-            self.h_win,
-            self.wall_color,
-        )
-
-        self.m.mlx_put_image_to_window(
-            self.mlx,
-            self.win,
-            self.img,
-            0,
-            0,
-        )
-          
-        self.fill_cell(
-            entry[0] * self.cell_size_w,
-            entry[1] * self.cell_size_h,
-            self.entry_color,
-        )
-
-        self.fill_cell(
-            exit_[0] * self.cell_size_w,
-            exit_[1] * self.cell_size_h,
-            self.exit_color,
-        )
-
-        self.draw_line_h(
-            0,
-            self.w_win,
-            0,
-            self.wall_color,
-        )
-
-        self.draw_line_h(
-            0,
-            self.w_win,
-            self.h_win - 1,
-            self.wall_color,
-        )
-
-        self.draw_line_v(
-            0,
-            0,
-            self.h_win,
-            self.wall_color,
-        )
-
-        self.draw_line_v(
-            self.w_win - 1,
-            0,
-            self.h_win,
-            self.wall_color,
-        )
-
-        self.m.mlx_put_image_to_window(
-            self.mlx,
-            self.win,
-            self.img,
-            0,
-            0,
-        )
+        self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
 
     def clear_image(self) -> None:
         for y in range(self.h_win):

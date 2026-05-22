@@ -30,6 +30,8 @@ class Maze:
         self.visited: list[list[bool]] = self.__init_visited()
         self.current_x: int = 0
         self.current_y: int = 0
+        if config["SPEED"]:
+            self.speed = int(config["SPEED"])
         self.phase: str = "kill"
         self.wall: int = 0b1111
         self.started: bool = False

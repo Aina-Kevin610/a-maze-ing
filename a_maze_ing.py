@@ -7,8 +7,7 @@ from render_terminal import print_box
 def loop_hook(param):
     draw, rand, maze = param
     try:
-        frame = 3
-
+        frame = maze.speed
         for _ in range(frame):
             if maze.algo == "hunt_and_kill":
                 if draw.maze.phase != "done":
@@ -44,7 +43,10 @@ def loop_hook(param):
             if draw.maze.solve_phase == "idle":
                 draw.maze.init_solve()
             if draw.maze.solve_phase not in ("idle", "done"):
-                draw.maze.step_solve()
+                for _ in range(maze.speed - 2):
+                    draw.maze.step_solve()
+                    if draw.maze.solve_phase == "done":
+                        break
             if draw.maze.solve_phase == "done" and not draw.saved:
                 draw.maze.solve()
                 draw.maze.save(draw.maze.hexa_maze())
@@ -77,16 +79,16 @@ def main() -> None:
         draw = DrawingMaze(maze, None, 0xFF000000)
         draw.saved = False
         draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
-        print_box(maze, [mess, "menu", GREEN])
+        print_box([maze, mess, "menu", GREEN])
         draw.m.mlx_loop(draw.mlx)
     except KeyboardInterrupt as e:
-        print("Program interupted - ", e)
+        print_box([None, "Program interupted - " + e, "faillure", YELLOW])
         sys.exit(0)
     except Exception as e:
-        print("Program interupted - ", e)
+        print_box([None, "Program interupted - " + e, "faillure", YELLOW])
         sys.exit(0)
     except EOFError as e:
-        print("Program interupted - ", e)
+        print_box([None, "Program interupted - " + e, "faillure", YELLOW])
         sys.exit(0)
 
 

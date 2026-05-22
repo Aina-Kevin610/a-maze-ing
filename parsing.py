@@ -4,6 +4,15 @@ from typing import Any
 from render_terminal import print_box
 
 
+RED     = "\033[91m"
+GREEN   = "\033[92m"
+YELLOW  = "\033[93m"
+BLUE    = "\033[94m"
+MAGENTA = "\033[95m"
+CYAN    = "\033[96m"
+RESET   = "\033[0m"
+
+
 class ParseError(Exception):
 
     def __init__(self, msg: str = "Invalid config format!") -> None:
@@ -21,10 +30,10 @@ def read_file(filename: str) -> list[str]:
             content = file.read().strip().splitlines()
 
     except ParseError as error:
-        print("Error -", error)
+        print_box([None, "Error -", error, "faillure", RED])
 
     except FileNotFoundError:
-        print("Error - File not found!")
+        print_box([None, "Error - File not found!", "faillure", RED])
 
     return content
 
@@ -69,7 +78,7 @@ def test_len_error(content: list[str]) -> list[tuple[str, str]]:
         return tuples
 
     except ParseError as error:
-        print("Error -", error)
+        print_box([None, "Error -", error, "faillure", RED])
         os._exit(0)
 
 
@@ -113,6 +122,9 @@ def is_valid(final: dict[str, Any]) -> None:
 
         if "SEED" not in final:
             final["SEED"] = None
+        
+        if "SPEED" not in final:
+            final["SPEED"] = None
 
         width = int(final["WIDTH"])
         height = int(final["HEIGHT"])
@@ -143,6 +155,11 @@ def is_valid(final: dict[str, Any]) -> None:
                 f"Unknown parameter for ALGO! "
                 f"Algo must be {algos}"
             )
+        
+        final["SPEED"] = int(final["SPEED"])
+
+        if final["SPEED"] < 1:
+            raise ParseError("Invalid SPEED value, must be >= 1")
 
         if len(final["ENTRY"]) != 2:
             raise ParseError("Invalid ENTRY parameter!")
@@ -168,7 +185,7 @@ def is_valid(final: dict[str, Any]) -> None:
             )
 
     except (ValueError, ParseError) as error:
-        print("Error -", error)
+        print_box([None, f"Error - {error}", "failure", RED])
         os._exit(0)
 
 
@@ -186,7 +203,7 @@ def parse_config(
     validated = test_len_error(cleaned)
 
     if len(validated) < 6:
-        print("Error - Missing mandatory parameter!")
+        print_box([None, "Error - Missing mandatory parameter!", "faillure", RED])
         os._exit(0)
 
     as_dict = convert_to_dict(validated)
