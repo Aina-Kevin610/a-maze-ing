@@ -41,7 +41,7 @@ def box(msg: str | list[str], label: str, color: str) -> None:
 
     print("\n".join(lines))
 
-def print_box(maze, [param]) -> None:
+def print_box(maze, param) -> None:
     mess, label, color = param
     loading()
     box(mess, label, color)

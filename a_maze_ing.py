@@ -7,7 +7,7 @@ from render_terminal import print_box
 def loop_hook(param):
     draw, rand, maze = param
     try:
-        frame = 1
+        frame = 3
 
         for _ in range(frame):
             if maze.algo == "hunt_and_kill":
@@ -68,7 +68,7 @@ RESET   = "\033[0m"
 
 def main() -> None:
     mess = [
-        "P    show/hide path",
+        "P        show/hide path",
         "Enter    regenerate",
         "Space    change wall color"
     ]
