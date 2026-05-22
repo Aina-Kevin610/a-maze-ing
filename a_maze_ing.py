@@ -69,27 +69,25 @@ RESET   = "\033[0m"
 
 
 def main() -> None:
-    # APRÈS
-    mess_menu = [
-        "P          show/hide path",
-        "Enter      regenerate",
-        "Space      change wall color",
-        "ESC        quit",
-    ]
-
-    mess_info = [
-        f"Algorithm  {maze.algo}",
-        f"Size       {maze.width} x {maze.height}",
-        f"Entry      {maze.entry[0]}, {maze.entry[1]}",
-        f"Exit       {maze.exit[0]}, {maze.exit[1]}",
-        f"Speed      {maze.speed}",
-        f"Seed       {maze.seed}",
-        f"Perfect    {maze.perfect}",
-        f"Output     {maze.output_file}",
-    ]
-
     try:
         maze = Maze()
+        mess_menu = [
+            "P          show/hide path",
+            "Enter      regenerate",
+            "Space      change wall color",
+            "ESC        quit",
+        ]
+
+        mess_info = [
+            f"Algorithm  {maze.algo}",
+            f"Size       {maze.width} x {maze.height}",
+            f"Entry      {maze.entry[0]}, {maze.entry[1]}",
+            f"Exit       {maze.exit[0]}, {maze.exit[1]}",
+            f"Speed      {maze.speed}",
+            f"Seed       {maze.seed}",
+            f"Perfect    {maze.perfect}",
+            f"Output     {maze.output_file}",
+        ]
         draw = DrawingMaze(maze, None, 0xFF000000)
         draw.saved = False
         draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])

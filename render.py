@@ -167,10 +167,10 @@ class DrawingMaze:
         self.data[offset + 3] = 0xFF
 
     def handle_keys(
-        self,
-        keycode: int,
-        params: list[Any],
-    ) -> int:
+    self,
+    keycode: int,
+    params: list[Any],
+) -> int:
         _ = params
 
         if keycode == 32:
@@ -186,44 +186,42 @@ class DrawingMaze:
                 0xDC143CFF,
                 0xB22222FF,
             ]
-
             print_box([None, "Changing wall color...", "Action", MAGENTA])
-
             self.wall_color = random.choice(colors)
-
             self.draw_cell()
 
         if keycode == 112:
             self.show_path = not self.show_path
 
+        if keycode == 43:
+            self.maze.speed += 1
+            print_box([None, f"Speed  {self.maze.speed}", "Action", MAGENTA])
+
+        if keycode == 45:
+            self.maze.speed = max(1, self.maze.speed - 1)
+            print_box([None, f"Speed  {self.maze.speed}", "Action", MAGENTA])
+
         if keycode == 65307:
             print_box([None, "Exited with ESC ...", "Action", MAGENTA])
-
-            self.m.mlx_destroy_window(
-                self.mlx,
-                self.win,
-            )
-
+            self.m.mlx_destroy_window(self.mlx, self.win)
             self.m.mlx_loop_exit(self.mlx)
 
         if keycode == 65293:
             print_box([None, "Regenerating...", "Action", MAGENTA])
-
             self.maze = Maze()
             self.saved = False
-
             self.clear_image()
-
             self.m.mlx_loop_hook(
                 self.mlx,
                 loop_hook,
                 [self, self.maze.rand, self.maze],
             )
-
             self.m.mlx_loop(self.mlx)
 
         return 0
+    
 
+    
     def draw_line_h(
         self,
         x0: int,
