@@ -69,17 +69,32 @@ RESET   = "\033[0m"
 
 
 def main() -> None:
-    mess = [
-        "P        show/hide path",
-        "Enter    regenerate",
-        "Space    change wall color"
+    # APRÈS
+    mess_menu = [
+        "P          show/hide path",
+        "Enter      regenerate",
+        "Space      change wall color",
+        "ESC        quit",
     ]
+
+    mess_info = [
+        f"Algorithm  {maze.algo}",
+        f"Size       {maze.width} x {maze.height}",
+        f"Entry      {maze.entry[0]}, {maze.entry[1]}",
+        f"Exit       {maze.exit[0]}, {maze.exit[1]}",
+        f"Speed      {maze.speed}",
+        f"Seed       {maze.seed}",
+        f"Perfect    {maze.perfect}",
+        f"Output     {maze.output_file}",
+    ]
+
     try:
         maze = Maze()
         draw = DrawingMaze(maze, None, 0xFF000000)
         draw.saved = False
         draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
-        print_box([maze, mess, "menu", GREEN])
+        print_box([None, mess_menu, "menu", GREEN])
+        print_box([None, mess_info, "info", CYAN])
         draw.m.mlx_loop(draw.mlx)
     except KeyboardInterrupt as e:
         print_box([None, "Program interupted - " + e, "faillure", YELLOW])
