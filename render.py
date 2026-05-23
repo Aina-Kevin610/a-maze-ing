@@ -67,8 +67,8 @@ class DrawingMaze:
         wall_color: int = 0x00FF00FF,
         bg_color: int = 0x000000FF,
     ) -> None:
-        self.h_win = 360
-        self.w_win = 360
+        self.h_win = 480
+        self.w_win = 480
 
         self.cell_size_w = self.w_win // maze.width
         self.cell_size_h = self.h_win // maze.height

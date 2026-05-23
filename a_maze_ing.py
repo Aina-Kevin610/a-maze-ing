@@ -98,7 +98,7 @@ def main() -> None:
         print_box([None, "Program interupted - " + e, "faillure", YELLOW])
         sys.exit(0)
     except Exception as e:
-        print_box([None, "Program interupted - " + e, "faillure", YELLOW])
+        print_box([None, f"Program interupted - {e}" , "faillure", YELLOW])
         sys.exit(0)
     except EOFError as e:
         print_box([None, "Program interupted - " + e, "faillure", YELLOW])
