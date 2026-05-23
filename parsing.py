@@ -4,13 +4,13 @@ from typing import Any
 from render_terminal import print_box
 
 
-RED     = "\033[91m"
-GREEN   = "\033[92m"
-YELLOW  = "\033[93m"
-BLUE    = "\033[94m"
-MAGENTA = "\033[95m"
-CYAN    = "\033[96m"
-RESET   = "\033[0m"
+red     = "\033[91m"
+green   = "\033[92m"
+yellow  = "\033[93m"
+bleu    = "\033[94m"
+magenta = "\033[95m"
+cyan    = "\033[96m"
+reset   = "\033[0m"
 
 
 class ParseError(Exception):
@@ -30,10 +30,10 @@ def read_file(filename: str) -> list[str]:
             content = file.read().strip().splitlines()
 
     except ParseError as error:
-        print_box([None, "Error -", error, "faillure", RED])
+        print_box([None, "Error -", error, "faillure", red])
 
     except FileNotFoundError:
-        print_box([None, "Error - File not found!", "faillure", RED])
+        print_box([None, "Error - File not found!", "faillure", red])
 
     return content
 
@@ -78,7 +78,7 @@ def test_len_error(content: list[str]) -> list[tuple[str, str]]:
         return tuples
 
     except ParseError as error:
-        print_box([None, "Error -", error, "faillure", RED])
+        print_box([None, "Error -", error, "faillure", red])
         os._exit(0)
 
 
@@ -185,7 +185,7 @@ def is_valid(final: dict[str, Any]) -> None:
             )
 
     except (ValueError, ParseError) as error:
-        print_box([None, f"Error - {error}", "failure", RED])
+        print_box([None, f"Error - {error}", "failure", red])
         os._exit(0)
 
 
@@ -203,7 +203,7 @@ def parse_config(
     validated = test_len_error(cleaned)
 
     if len(validated) < 6:
-        print_box([None, "Error - Missing mandatory parameter!", "faillure", RED])
+        print_box([None, "Error - Missing mandatory parameter!", "faillure", red])
         os._exit(0)
 
     as_dict = convert_to_dict(validated)

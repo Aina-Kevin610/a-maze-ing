@@ -106,36 +106,24 @@ class DrawingMaze:
             y * self.size_line
         ) + (x * (self.bpp // 8))
 
-        blue = (color >> 24) & 0xFF
+        bleu = (color >> 24) & 0xFF
         green = (color >> 16) & 0xFF
         red = (color >> 8) & 0xFF
 
-        self.data[offset] = blue
+        self.data[offset] = bleu
         self.data[offset + 1] = green
         self.data[offset + 2] = red
         self.data[offset + 3] = 0xFF
 
-    def handle_keys(
-    self,
-    keycode: int,
-    params: list[Any],
-) -> int:
+    def handle_keys(self,
+                    keycode: int,
+                    params: list[Any]
+                    ) -> int:
         _ = params
 
         if keycode == 32:
-            colors = [
-                0xFFFFFFFF,
-                0xFF0000FF,
-                0x00FF00FF,
-                0x0000FFFF,
-                0xFFFF00FF,
-                0x00FFFFFF,
-                0xFF00FFFF,
-                0x8B0000FF,
-                0xDC143CFF,
-                0xB22222FF,
-            ]
-            print_box([None, "Changing wall color...", "Action", MAGENTA])
+            
+            print_box([None, "Changing wall color...", "Action", magenta])
             self.wall_color = random.choice(colors)
             self.draw_cell()
 
@@ -144,19 +132,19 @@ class DrawingMaze:
 
         if keycode == 43:
             self.maze.speed += 1
-            print_box([None, f"Speed  {self.maze.speed}", "Action", MAGENTA])
+            print_box([None, f"Speed  {self.maze.speed}", "Action", magenta])
 
         if keycode == 45:
             self.maze.speed = max(1, self.maze.speed - 1)
-            print_box([None, f"Speed  {self.maze.speed}", "Action", MAGENTA])
+            print_box([None, f"Speed  {self.maze.speed}", "Action", magenta])
 
         if keycode == 65307:
-            print_box([None, "Exited with ESC ...", "Action", MAGENTA])
+            print_box([None, "Exited with ESC ...", "Action", magenta])
             self.m.mlx_destroy_window(self.mlx, self.win)
             self.m.mlx_loop_exit(self.mlx)
 
         if keycode == 65293:
-            print_box([None, "Regenerating...", "Action", MAGENTA])
+            print_box([None, "Regenerating...", "Action", magenta])
             self.maze = Maze()
             self.saved = False
             self.clear_image()
@@ -251,12 +239,12 @@ class DrawingMaze:
 
         red = int(sr + t * (er - sr))
         green = int(sg + t * (eg - sg))
-        blue = int(sb + t * (eb - sb))
+        bleu = int(sb + t * (eb - sb))
 
         color = (
             (red << 24)
             | (green << 16)
-            | (blue << 8)
+            | (bleu << 8)
             | 0xFF
         )
 
@@ -272,16 +260,16 @@ class DrawingMaze:
         color: int,
         alpha: float,
     ) -> int:
-        blue = (color >> 24) & 0xFF
+        bleu = (color >> 24) & 0xFF
         green = (color >> 16) & 0xFF
         red = (color >> 8) & 0xFF
 
-        bg_blue = (self.bg_color >> 24) & 0xFF
+        bg_bleu = (self.bg_color >> 24) & 0xFF
         bg_green = (self.bg_color >> 16) & 0xFF
         bg_red = (self.bg_color >> 8) & 0xFF
 
-        new_blue = int(
-            bg_blue + (blue - bg_blue) * alpha
+        new_bleu = int(
+            bg_bleu + (bleu - bg_bleu) * alpha
         )
 
         new_green = int(
@@ -293,7 +281,7 @@ class DrawingMaze:
         )
 
         return (
-            (new_blue << 24)
+            (new_bleu << 24)
             | (new_green << 16)
             | (new_red << 8)
             | 0xFF

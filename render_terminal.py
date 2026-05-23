@@ -3,7 +3,7 @@ from utils import *
 
 def box(msg: str | list[str], label: str, color: str) -> None:
     prefix = "┏━━━━━━━━━━>>>"
-    suffix = "<<<"
+    suffix = "<<<━━━━━━━━━━"
 
     if isinstance(msg, str):
         msgs = [msg]
@@ -19,10 +19,10 @@ def box(msg: str | list[str], label: str, color: str) -> None:
     dashes = "━" * (w - len(prefix) - len(label) - len(suffix) - 1)
     header = f"{prefix}{label}{suffix}{dashes}┓"
 
-    lines = [f"{color}{header}{RESET}"]
+    lines = [f"{color}{header}{reset}"]
     for m in msgs:
-        lines.append(f"{color}┃{RESET}  {m:<{w - 6}}  {color}┃{RESET}")
-    lines.append(f"{color}┗{'━' * (w - 2)}┛{RESET}")
+        lines.append(f"{color}┃{reset}  {m:<{w - 6}}  {color}┃{reset}")
+    lines.append(f"{color}┗{'━' * (w - 2)}┛{reset}")
 
     print("\n".join(lines))
 
