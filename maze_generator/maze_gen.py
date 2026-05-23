@@ -1,14 +1,15 @@
 from collections import deque
 import random
 import os
-from typing import Optional, Any
-
+from typing import *
 from parsing import parse_config
 from .pattern import Pattern
+from utils import *
 
 
 class ConfigError(Exception):
     pass
+
 
 class Maze:
 
@@ -388,9 +389,9 @@ class Maze:
         return grid
 
     def save(self, grid: list[list[str]]) -> None:
-        print("Saving maze in", self.output_file, "...")
+        loading(f"Saving maze in {self.output_file}...", 0.08 )
         try:
-            with open(self.output_file, "w", encoding="utf-8") as f:
+            with open(self.output_file, "w") as f:
                 for row in grid:
                     line = (
                         str(row)
@@ -419,7 +420,7 @@ class Maze:
                     directions = self.path_to_directions()
                     f.write(f"\n{''.join(directions)}")
         except OSError:
-            print(f"Error - {self.output_file} not created !")
+            print(f"Error - {self.output_file} not created !", "Error", red)
 
     def path_to_directions(self) -> list[str]:
         directions: list[str] = []

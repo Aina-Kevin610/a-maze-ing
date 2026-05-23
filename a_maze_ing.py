@@ -26,19 +26,20 @@ def main() -> None:
             f"Output     {maze.output_file}",
         ]
         draw = DrawingMaze(maze, None, 0xFF000000)
+        loading("Generating maze", 0.08)
         draw.saved = False
         draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
-        print_box([None, mess_menu, "menu", green])
-        print_box([None, mess_info, "info", cyan])
+        print_box([mess_menu, "menu", green])
+        print_box([mess_info, "info", cyan])
         draw.m.mlx_loop(draw.mlx)
     except KeyboardInterrupt as e:
-        print_box([None, "Program interupted - " + e, "faillure", yellow])
+        print_box(["Program interupted - " + e, "faillure", yellow])
         sys.exit(0)
     except Exception as e:
-        print_box([None, f"Program interupted - {e}" , "faillure", yellow])
+        print_box([f"Program interupted - {e}" , "faillure", yellow])
         sys.exit(0)
     except EOFError as e:
-        print_box([None, "Program interupted - " + e, "faillure", yellow])
+        print_box(["Program interupted - " + e, "faillure", yellow])
         sys.exit(0)
 
 

@@ -122,29 +122,23 @@ class DrawingMaze:
         _ = params
 
         if keycode == 32:
-            
-            print_box([None, "Changing wall color...", "Action", magenta])
+            loading("Changing wall color...", 0.08)
+            print_box(["Wall color changed!", "Action", magenta])
             self.wall_color = random.choice(colors)
             self.draw_cell()
 
         if keycode == 112:
             self.show_path = not self.show_path
 
-        if keycode == 43:
-            self.maze.speed += 1
-            print_box([None, f"Speed  {self.maze.speed}", "Action", magenta])
-
-        if keycode == 45:
-            self.maze.speed = max(1, self.maze.speed - 1)
-            print_box([None, f"Speed  {self.maze.speed}", "Action", magenta])
-
         if keycode == 65307:
-            print_box([None, "Exited with ESC ...", "Action", magenta])
+            loading("Exiting...", 0.08)
+            print_box(["Exited successfully!", "Action", magenta])
             self.m.mlx_destroy_window(self.mlx, self.win)
             self.m.mlx_loop_exit(self.mlx)
 
         if keycode == 65293:
-            print_box([None, "Regenerating...", "Action", magenta])
+            loading("Regenerating maze...", 0.08)
+            print_box(["Maze regenerated", "Action", magenta])
             self.maze = Maze()
             self.saved = False
             self.clear_image()

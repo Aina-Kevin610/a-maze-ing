@@ -27,6 +27,5 @@ def box(msg: str | list[str], label: str, color: str) -> None:
     print("\n".join(lines))
 
 def print_box(param) -> None:
-    maze, mess, label, color = param
-    loading("Generating maze", 0.08)
+    mess, label, color = param
     box(mess, label, color)
