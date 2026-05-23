@@ -1,25 +1,4 @@
-import time
-import sys
-
-
-RED     = "\033[91m"
-GREEN   = "\033[92m"
-YELLOW  = "\033[93m"
-BLUE    = "\033[94m"
-MAGENTA = "\033[95m"
-CYAN    = "\033[96m"
-RESET   = "\033[0m"
-
-
-def loading(mess: str, sec: float):
-    frames = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]
-    end = time.time() + 2
-    while time.time() < end:
-        for f in frames:
-            sys.stdout.write(f"\r{CYAN}{f}{RESET} {mess}...")
-            sys.stdout.flush()
-            time.sleep(sec)
-    sys.stdout.write(f"\r{CYAN}✓{RESET} Done!              \n")
+from utils import *
 
 
 def box(msg: str | list[str], label: str, color: str) -> None:
