@@ -1,23 +1,47 @@
-from collections import deque
-import random
 import os
-from typing import *
-from parsing import parse_config
+import sys
+import random
+from typing import Any, Optional
 from .pattern import Pattern
-from utils import *
+from collections import deque
+from parsing import parse_config
 
 
 class ConfigError(Exception):
+    """Exception raised when an invalid maze configuration is detected."""
+
     pass
 
 
 class Maze:
+    """
+    Generate, solve, and save mazes using multiple algorithms.
+
+    Supported generation algorithms:
+        - Hunt and Kill
+        - Recursive Backtracking (DFS)
+        - Prim's Algorithm
+
+    The class also supports:
+        - Pattern protection zones
+        - Perfect and imperfect mazes
+        - Maze solving using Breadth-First Search (BFS)
+        - Step-by-step generation and solving visualization
+    """
 
     def __init__(
         self,
         pattern_: str = "42",
+        filename: str = "config.txt"
     ) -> None:
-        config = parse_config()
+        """
+        Initialize a maze instance from the configuration file.
+
+        Args:
+            pattern_: Pattern to preserve inside the maze.
+            filename: Path to the configuration file.
+        """
+        config = parse_config(filename)
 
         self.pattern_: str = config.get("PATTERN", pattern_) or pattern_
         self.width: int = int(config["WIDTH"])
@@ -31,8 +55,10 @@ class Maze:
         self.visited: list[list[bool]] = self.__init_visited()
         self.current_x: int = 0
         self.current_y: int = 0
-        if config["SPEED"]:
-            self.speed = int(config["SPEED"])
+
+        speed_val = config.get("SPEED")
+        self.speed: int = int(speed_val) if speed_val is not None else 1
+
         self.phase: str = "kill"
         self.wall: int = 0b1111
         self.started: bool = False
@@ -54,19 +80,7 @@ class Maze:
 
         self.stack: list[tuple[int, int]] = []
 
-        if (
-            self.height >= len(self.pattern_) * 5
-            or (
-                self.width >= len(self.pattern_) * 5
-                and self.pattern_ != "42"
-            )
-        ):
-            self.__init_42()
-        else:
-            print(
-                f"Pattern [{self.pattern_}] cannot be contained within "
-                "the maze! (10 x 10 is required)"
-            )
+        # FIX: un seul bloc conditionnel pour __init_42
         if self.height >= 10 and self.width >= 10:
             self.__init_42()
         else:
@@ -80,11 +94,17 @@ class Maze:
             self.rand = random.Random(self.seed)
         self.generated: bool = False
 
-        if self.exit in self.protected:
-            print("Error!")
-            os._exit(0)
+        x_e, y_e = self.entry
+        if (int(x_e), int(y_e)) in self.protected:
+            print("Error - Inaccessible entry!")
+            sys.exit(1)
 
     def __init_42(self) -> None:
+        """
+        Initialize protected zones based on a pattern.
+
+        Converts the pattern into forbidden coordinates inside the grid.
+        """
         p = Pattern(self.pattern_)
         x_grid = self.width // 2
         y_grid = self.height // 2
@@ -97,29 +117,37 @@ class Maze:
             return
         offset_x = len(pat[0]) // 2
         offset_y = len(pat) // 2
-        i = 0
-        while i < len(pat):
-            j = 0
-            while j < len(pat[i]):
+        for i in range(len(pat)):
+            for j in range(len(pat[i])):
                 if pat[i][j] == 1:
                     self.protected.add(
                         (x_grid - offset_x + j, y_grid - offset_y + i)
                     )
-                j += 1
-            i += 1
         x, y = self.entry
         if (int(x), int(y)) in self.protected:
             print("Error - Inaccessible entry!")
-            os._exit(0)
+            sys.exit(1)
         x, y = self.exit
         if (int(x), int(y)) in self.protected:
             print("Error - Inaccessible exit!")
-            os._exit(0)
+            sys.exit(1)
 
     def __init_grid(self) -> list[list[int]]:
+        """
+        Initialize the maze grid.
+
+        Returns:
+            A grid filled with walls (value 15).
+        """
         return [[15 for _ in range(self.width)] for _ in range(self.height)]
 
-    def generate(self) -> list[list[int]]:
+    def generate(self) -> list[list[Any]]:
+        """
+        Generate the maze using the selected algorithm.
+
+        Returns:
+            The generated maze grid.
+        """
         if self.algo == "hunt_and_kill":
             return self.hunt_and_kill()
         if self.algo in ("backtracking", "DFS"):
@@ -129,10 +157,19 @@ class Maze:
         return self.grid
 
     def hexa_maze(self) -> list[list[str]]:
+        """
+        Convert the maze grid into hexadecimal representation.
+
+        Internal grid encoding: bit0=West, bit1=South, bit2=East, bit3=North.
+        Output file encoding:   bit0=North, bit1=East, bit2=South, bit3=West.
+
+        Returns:
+            Maze grid encoded in hexadecimal format per the subject spec.
+        """
         def remap(v: int) -> int:
-            west  = (v >> 0) & 1
+            west = (v >> 0) & 1
             south = (v >> 1) & 1
-            east  = (v >> 2) & 1
+            east = (v >> 2) & 1
             north = (v >> 3) & 1
             return (north << 0) | (east << 1) | (south << 2) | (west << 3)
 
@@ -142,12 +179,30 @@ class Maze:
         ]
 
     def is_all_visited(self) -> bool:
+        """
+        Check whether all cells have been visited.
+
+        Returns:
+            True if all cells are visited, otherwise False.
+        """
         return all(all(row) for row in self.visited)
 
     def __init_visited(self) -> list[list[bool]]:
-        return [[False for _ in range(self.width)] for _ in range(self.height)]
+        """
+        Initialize the visited cells grid.
+
+        Returns:
+            A boolean matrix initialized to False.
+        """
+        return [[False] * self.width for _ in range(self.height)]
 
     def _make_imperfect(self, rate: float = 0.15) -> None:
+        """
+        Randomly remove walls to create an imperfect maze.
+
+        Args:
+            rate: Probability of removing a wall.
+        """
         for y in range(self.height):
             for x in range(self.width):
                 if (x, y) in self.protected:
@@ -164,6 +219,18 @@ class Maze:
     def remove_wall(
         self, x: int, y: int, xn: int, yn: int
     ) -> tuple[int, int, int]:
+        """
+        Remove the wall between two adjacent cells.
+
+        Args:
+            x: X coordinate of current cell.
+            y: Y coordinate of current cell.
+            xn: X coordinate of neighbor cell.
+            yn: Y coordinate of neighbor cell.
+
+        Returns:
+            Updated position and removed wall direction.
+        """
         dx, dy = xn - x, yn - y
         if dx == 1:
             direction = 0b0100
@@ -186,6 +253,16 @@ class Maze:
         return xn, yn, opposite
 
     def get_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
+        """
+        Get unvisited neighbors of a cell.
+
+        Args:
+            x: X coordinate.
+            y: Y coordinate.
+
+        Returns:
+            List of valid neighbor coordinates.
+        """
         way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         neighbors: list[tuple[int, int]] = []
         for dx, dy in way:
@@ -200,6 +277,16 @@ class Maze:
         return neighbors
 
     def get_visited_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
+        """
+        Get visited neighbors of a cell.
+
+        Args:
+            x: X coordinate.
+            y: Y coordinate.
+
+        Returns:
+            List of visited neighbor coordinates.
+        """
         way = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         neighbors: list[tuple[int, int]] = []
         for dx, dy in way:
@@ -214,6 +301,7 @@ class Maze:
         return neighbors
 
     def init_prim(self) -> None:
+        """Initialize Prim's algorithm."""
         x = self.rand.randint(0, self.width - 1)
         y = self.rand.randint(0, self.height - 1)
         while (x, y) in self.protected:
@@ -226,6 +314,13 @@ class Maze:
         self._expand_prim(x, y)
 
     def _expand_prim(self, x: int, y: int) -> None:
+        """
+        Add valid neighboring cells of (x, y) to the Prim frontier.
+
+        Args:
+            x: X coordinate of the cell to expand from.
+            y: Y coordinate of the cell to expand from.
+        """
         for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
             nx, ny = x + dx, y + dy
             if (
@@ -239,6 +334,12 @@ class Maze:
                 self.prim_frontier.append((nx, ny))
 
     def step_prim(self) -> bool:
+        """
+        Execute one step of Prim's algorithm.
+
+        Returns:
+            True if generation continues, False if finished.
+        """
         if not self.prim_frontier:
             self.phase = "done"
             self.generated = True
@@ -257,7 +358,12 @@ class Maze:
         return True
 
     def prim(self) -> list[list[str]]:
-        print("=== Prim ===")
+        """
+        Generate a maze using Prim's algorithm.
+
+        Returns:
+            Generated maze grid.
+        """
         self.init_prim()
         while self.prim_frontier:
             self.step_prim()
@@ -266,6 +372,12 @@ class Maze:
         return grid
 
     def kill(self) -> bool:
+        """
+        Perform the kill phase of Hunt and Kill algorithm.
+
+        Returns:
+            True if a move was made, otherwise False.
+        """
         neighbors = self.get_neighbors(self.current_x, self.current_y)
         if not neighbors:
             return False
@@ -278,6 +390,12 @@ class Maze:
         return True
 
     def hunt(self) -> Optional[tuple[int, int]]:
+        """
+        Perform the hunt phase of Hunt and Kill algorithm.
+
+        Returns:
+            Next starting cell or None if finished.
+        """
         for i in range(self.height):
             for j in range(self.width):
                 if (
@@ -292,6 +410,12 @@ class Maze:
         return None
 
     def step(self) -> bool:
+        """
+        Execute one generation step (Hunt and Kill).
+
+        Returns:
+            True if generation continues.
+        """
         if self.phase == "done":
             return False
         if self.phase == "kill":
@@ -313,7 +437,12 @@ class Maze:
         return False
 
     def hunt_and_kill(self) -> list[list[str]]:
-        print("=== Hunt and Kill ===")
+        """
+        Generate a maze using the Hunt and Kill algorithm.
+
+        Returns:
+            Generated maze grid.
+        """
         while self.phase != "done":
             if not self.started:
                 self.current_x = self.rand.randint(0, self.width - 1)
@@ -335,6 +464,7 @@ class Maze:
         return self.hexa_maze()
 
     def init_backtracking(self) -> None:
+        """Initialize the DFS backtracking algorithm."""
         x = self.rand.randint(0, self.width - 1)
         y = self.rand.randint(0, self.height - 1)
         while (x, y) in self.protected:
@@ -345,6 +475,12 @@ class Maze:
         self.current_x, self.current_y = x, y
 
     def step_backtracking(self) -> bool:
+        """
+        Execute one step of DFS backtracking.
+
+        Returns:
+            True if generation continues.
+        """
         if not self.stack:
             self.phase = "done"
             self.generated = True
@@ -363,6 +499,12 @@ class Maze:
         return True
 
     def backtracking(self) -> list[list[str]]:
+        """
+        Generate a maze using recursive backtracking (DFS).
+
+        Returns:
+            Generated maze grid.
+        """
         stack: list[tuple[int, int]] = []
         x = self.rand.randint(0, self.width - 1)
         y = self.rand.randint(0, self.height - 1)
@@ -389,40 +531,44 @@ class Maze:
         return grid
 
     def save(self, grid: list[list[str]]) -> None:
-        loading(f"Saving maze in {self.output_file}...", 0.08 )
+        """
+        Save the maze to a file in the format required by the subject.
+
+        Format:
+            - One hex digit per cell, no separator, one row per line.
+            - Empty line.
+            - Entry coordinates (x,y).
+            - Exit coordinates (x,y).
+            - Shortest path as a string of N/E/S/W letters.
+
+        Args:
+            grid: Maze grid to save.
+        """
         try:
             with open(self.output_file, "w") as f:
                 for row in grid:
-                    line = (
-                        str(row)
-                        .replace("[", "")
-                        .replace("]", "")
-                        .replace(",", "")
-                        .replace("'", "")
-                        .replace(" ", "")
-                    )
-                    f.write(line + "\n")
-                entry = (
-                    str(self.entry)
-                    .replace("(", "")
-                    .replace(")", "")
-                    .replace("'", "")
-                )
-                exit_ = (
-                    str(self.exit)
-                    .replace("(", "")
-                    .replace(")", "")
-                    .replace("'", "")
-                )
-                f.write(f"\n{entry}")
-                f.write(f"\n{exit_}")
+                    f.write("".join(row) + "\n")
+
+                entry_x, entry_y = self.entry
+                exit_x, exit_y = self.exit
+
+                f.write("\n")
+                f.write(f"{entry_x},{entry_y}\n")
+                f.write(f"{exit_x},{exit_y}\n")
+
                 if self.path:
                     directions = self.path_to_directions()
-                    f.write(f"\n{''.join(directions)}")
-        except OSError:
-            print(f"Error - {self.output_file} not created !", "Error", red)
+                    f.write("".join(directions) + "\n")
+        except OSError as e:
+            print(f"Error - {self.output_file} not created: {e}")
 
     def path_to_directions(self) -> list[str]:
+        """
+        Convert a path into cardinal directions.
+
+        Returns:
+            List of directions (N, S, E, W).
+        """
         directions: list[str] = []
         for i in range(len(self.path) - 1):
             x1, y1 = self.path[i]
@@ -440,6 +586,12 @@ class Maze:
         return directions
 
     def solve(self) -> None:
+        """
+        Solve the maze using BFS and store the shortest path.
+
+        Internal grid bit encoding:
+            bit0=West, bit1=South, bit2=East, bit3=North.
+        """
         start = (int(self.entry[0]), int(self.entry[1]))
         end = (int(self.exit[0]), int(self.exit[1]))
         queue: deque[tuple[int, int]] = deque([start])
@@ -458,19 +610,23 @@ class Maze:
                 return
             x, y = cur
             cell = self.grid[y][x]
-            for nx, ny, walled in [
-                (x - 1, y, cell & 1),
-                (x, y + 1, (cell >> 1) & 1),
-                (x + 1, y, (cell >> 2) & 1),
-                (x, y - 1, (cell >> 3) & 1),
+            # bit0=West(x-1), bit1=South(y+1), bit2=East(x+1), bit3=North(y-1)
+            for nx, ny, bit in [
+                (x - 1, y, 0),   # West
+                (x, y + 1, 1),   # South
+                (x + 1, y, 2),   # East
+                (x, y - 1, 3),   # North
             ]:
-                nb = (nx, ny)
-                if not walled and nb not in parent:
-                    parent[nb] = cur
-                    queue.append(nb)
+                if not (cell >> bit) & 1:
+                    nb = (nx, ny)
+                    if 0 <= nx < self.width and 0 <= ny < self.height:
+                        if nb not in parent:
+                            parent[nb] = cur
+                            queue.append(nb)
         self.path = []
 
     def init_solve(self) -> None:
+        """Initialize data structures for solving the maze using BFS."""
         start = (int(self.entry[0]), int(self.entry[1]))
         self._bfs_end = (int(self.exit[0]), int(self.exit[1]))
         self._bfs_queue = deque([start])
@@ -482,6 +638,12 @@ class Maze:
         self.path_index = 0
 
     def step_solve(self) -> bool:
+        """
+        Execute one step of BFS solving.
+
+        Returns:
+            True if solving continues.
+        """
         if self.solve_phase == "tracing":
             if self.path_index < len(self.path):
                 self.path_index += 1
@@ -494,6 +656,10 @@ class Maze:
             or self._bfs_queue is None
             or self._bfs_parent is None
         ):
+            self.solve_phase = "done"
+            return False
+
+        if not self._bfs_queue:
             self.solve_phase = "done"
             return False
 
@@ -514,15 +680,18 @@ class Maze:
 
         x, y = cur
         cell = self.grid[y][x]
-        for nx, ny, walled in [
-            (x - 1, y, cell & 1),
-            (x, y + 1, (cell >> 1) & 1),
-            (x + 1, y, (cell >> 2) & 1),
-            (x, y - 1, (cell >> 3) & 1),
+        # bit0=West(x-1), bit1=South(y+1), bit2=East(x+1), bit3=North(y-1)
+        for nx, ny, bit in [
+            (x - 1, y, 0),
+            (x, y + 1, 1),
+            (x + 1, y, 2),
+            (x, y - 1, 3),
         ]:
-            nb = (nx, ny)
-            if not walled and nb not in self._bfs_parent:
-                self._bfs_parent[nb] = cur
-                self._bfs_queue.append(nb)
-                self.frontier.add(nb)
+            if not (cell >> bit) & 1:
+                nb = (nx, ny)
+                if 0 <= nx < self.width and 0 <= ny < self.height:
+                    if nb not in self._bfs_parent:
+                        self._bfs_parent[nb] = cur
+                        self._bfs_queue.append(nb)
+                        self.frontier.add(nb)
         return True

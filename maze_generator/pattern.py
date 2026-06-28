@@ -255,15 +255,40 @@ patterns = {
 
 
 class Pattern:
+    """
+        Handles ASCII-style pattern generation for characters and numbers.
+        This class converts a string into a pixel-like representation
+        using predefined 2D binary matrices (glyphs).
+    """
     _patterns = patterns
     def __init__(self, text: str, spacing: int = 1):
+        """
+            Initialize a Pattern instance.
+            Args:
+                text: String containing characters to render.
+                spacing: Number of columns between characters.
+        """
         self.text = text
         self.spacing = spacing
 
     def create(self) -> list[list[list[int]]]:
+        """
+            Convert the input text into a list of glyph matrices.
+            Each character is mapped to a 2D binary pattern.
+            Returns:
+                A list of 2D lists representing each character pattern.
+                Characters not found in the pattern dictionary are ignored.
+        """
         return [self._patterns[char] for char in self.text if char in self._patterns]
 
     def create_merged(self) -> list[list[int]]:
+        """
+            Merge all character glyphs into a single 2D pattern.
+            Characters are placed side by side with optional spacing.
+            Returns:
+                A 2D list representing the full merged pattern.
+                Returns an empty list if no valid characters exist.
+        """
         glyphs = self.create()
         if not glyphs:
             return []
@@ -277,5 +302,3 @@ class Pattern:
                     line += sep
             result.append(line)
         return result
-    
-

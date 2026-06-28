@@ -1,13 +1,27 @@
-from maze_generator.maze_gen import Maze
-from render import DrawingMaze
 import sys
-from render_terminal import print_box
 from utils import *
+from render import DrawingMaze
+from maze_generator.maze_gen import Maze
+from render_terminal import print_box
 
 
 def main() -> None:
+    """
+        Initialize and run the maze generator application.
+        This function:
+            - Creates a maze instance.
+            - Displays configuration information.
+            - Creates the graphical renderer.
+            - Starts maze generation.
+            - Registers MLX event hooks.
+            - Launches the graphical event loop.
+        Raises:
+            KeyboardInterrupt: If the program is interrupted by the user.
+            EOFError: If an unexpected end-of-file condition occurs.
+            Exception: For any other unexpected runtime error.
+    """
     try:
-        maze = Maze()
+        maze = Maze(filename=sys.argv[1])
         mess_menu = [
             "P          show/hide path",
             "Enter      regenerate",
@@ -33,13 +47,13 @@ def main() -> None:
         print_box([mess_info, "info", cyan])
         draw.m.mlx_loop(draw.mlx)
     except KeyboardInterrupt as e:
-        print_box(["Program interupted - " + e, "faillure", yellow])
+        print_box(["Program interupted - ", e, "faillure", yellow])
         sys.exit(0)
     except Exception as e:
         print_box([f"Program interupted - {e}" , "faillure", yellow])
         sys.exit(0)
-    except EOFError as e:
-        print_box(["Program interupted - " + e, "faillure", yellow])
+    except BaseException as e:
+        print_box(["Program interupted - ", e, "faillure", yellow])
         sys.exit(0)
 
 

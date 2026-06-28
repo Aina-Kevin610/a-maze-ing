@@ -9,6 +9,15 @@ from utils import *
 
 class DrawingMaze:
 
+    """
+        Handle graphical rendering and visualization of a maze.
+        This class is responsible for:
+            - Creating and managing the MLX window.
+            - Drawing maze walls and cells.
+            - Displaying generation and solving progress.
+            - Handling keyboard events.
+            - Rendering entry, exit, and solution paths.
+    """
     def __init__(
         self,
         maze: Maze,
@@ -16,6 +25,14 @@ class DrawingMaze:
         wall_color: int = 0x00FF00FF,
         bg_color: int = 0x000000FF,
     ) -> None:
+        """
+            Initialize the maze renderer and create the graphical window.
+            Args:
+                maze: Maze instance to render.
+                hexa_maze: Optional hex maze representation.
+                wall_color: Color used for maze walls.
+                bg_color: Background color.
+        """
         self.h_win = 480
         self.w_win = 480
 
@@ -94,6 +111,13 @@ class DrawingMaze:
         y: int,
         color: int,
     ) -> None:
+        """
+            Draw a single pixel in the image buffer.
+            Args:
+                x: Horizontal pixel coordinate.
+                y: Vertical pixel coordinate.
+                color: RGBA color value.
+        """
         if (
             x < 0
             or y < 0
@@ -119,6 +143,19 @@ class DrawingMaze:
                     keycode: int,
                     params: list[Any]
                     ) -> int:
+        """
+            Handle keyboard events.
+            Supported keys:
+                - Space: Change wall color.
+                - P: Toggle solution path visibility.
+                - Enter: Regenerate the maze.
+                - Escape: Exit the application.
+            Args:
+                keycode: Pressed key code.
+                params: Additional event parameters.
+            Returns:
+                Always returns 0.
+        """
         _ = params
 
         if keycode == 32:
@@ -150,9 +187,8 @@ class DrawingMaze:
             self.m.mlx_loop(self.mlx)
 
         return 0
-    
 
-    
+   
     def draw_line_h(
         self,
         x0: int,
@@ -160,6 +196,14 @@ class DrawingMaze:
         y: int,
         color: int,
     ) -> None:
+        """
+            Draw a horizontal line.
+            Args:
+                x0: Starting x coordinate.
+                x1: Ending x coordinate.
+                y: Line y coordinate.
+                color: Line color.
+        """
         for x in range(x0, x1):
             self.my_put_pixel(x, y, color)
 
@@ -170,10 +214,24 @@ class DrawingMaze:
         y1: int,
         color: int,
     ) -> None:
+        """
+            Draw a vertical line.
+            Args:
+                x: Line x coordinate.
+                y0: Starting y coordinate.
+                y1: Ending y coordinate.
+                color: Line color.
+        """
         for y in range(y0, y1):
             self.my_put_pixel(x, y, color)
 
     def north(self, x: int, y: int) -> None:
+        """
+            Draw the north wall of a cell.
+            Args:
+                x: Cell pixel x coordinate.
+                y: Cell pixel y coordinate.
+        """
         self.draw_line_h(
             x,
             x + self.cell_size_w,
@@ -182,6 +240,12 @@ class DrawingMaze:
         )
 
     def south(self, x: int, y: int) -> None:
+        """
+            Draw the south wall of a cell.
+            Args:
+                x: Cell pixel x coordinate.
+                y: Cell pixel y coordinate.
+        """
         self.draw_line_h(
             x,
             x + self.cell_size_w,
@@ -190,6 +254,12 @@ class DrawingMaze:
         )
 
     def east(self, x: int, y: int) -> None:
+        """
+            Draw the east wall of a cell.
+            Args:
+                x: Cell pixel x coordinate.
+                y: Cell pixel y coordinate.
+        """
         self.draw_line_v(
             x + self.cell_size_w,
             y,
@@ -198,6 +268,12 @@ class DrawingMaze:
         )
 
     def west(self, x: int, y: int) -> None:
+        """
+            Draw the west wall of a cell.
+            Args:
+                x: Cell pixel x coordinate.
+                y: Cell pixel y coordinate.
+        """
         self.draw_line_v(
             x,
             y,
@@ -211,6 +287,13 @@ class DrawingMaze:
         y: int,
         color: int,
     ) -> None:
+        """
+            Fill an entire maze cell with a color.
+            Args:
+                x: Cell top-left pixel x coordinate.
+                y: Cell top-left pixel y coordinate.
+                color: Fill color.
+        """
         for i in range(y, y + self.cell_size_h):
             self.draw_line_h(
                 x,
@@ -226,6 +309,14 @@ class DrawingMaze:
         index: int,
         total: int,
     ) -> None:
+        """
+            Draw a solution path marker using a color gradient.
+            Args:
+                x: Cell x coordinate.
+                y: Cell y coordinate.
+                index: Position in the solution path.
+                total: Total number of cells in the path.
+        """
         t = index / max(total - 1, 1)
 
         sr, sg, sb = self.path_col_start
@@ -254,6 +345,14 @@ class DrawingMaze:
         color: int,
         alpha: float,
     ) -> int:
+        """
+            Blend a color with the background color.
+            Args:
+                color: Source color.
+                alpha: Blend factor between 0 and 1.
+            Returns:
+                The resulting blended color.
+        """
         bleu = (color >> 24) & 0xFF
         green = (color >> 16) & 0xFF
         red = (color >> 8) & 0xFF
@@ -288,13 +387,31 @@ class DrawingMaze:
         r: int,
         color: int,
     ) -> None:
+        """
+            Draw a filled circle.
+            Args:
+                cx: Circle center x coordinate.
+                cy: Circle center y coordinate.
+                r: Circle radius.
+                color: Fill color.
+        """
         for y in range(cy - r, cy + r + 1):
             for x in range(cx - r, cx + r + 1):
                 if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
                     self.my_put_pixel(x, y, color)
 
-
     def draw_cell(self) -> None:
+        """
+            Render the entire maze.
+            Draws:
+                - Explored cells.
+                - Frontier cells.
+                - Solution path.
+                - Maze walls.
+                - Entry and exit markers.
+                - Current generation position.
+            Updates the displayed image in the window.
+        """
         self.clear_image()
 
         entry = (
@@ -396,6 +513,9 @@ class DrawingMaze:
         self.m.mlx_put_image_to_window(self.mlx, self.win, self.img, 0, 0)
 
     def clear_image(self) -> None:
+        """
+            Clear the image buffer using the current background color.
+        """
         for y in range(self.h_win):
             for x in range(self.w_win):
                 offset = (
@@ -419,6 +539,9 @@ class DrawingMaze:
                 )
 
     def exit_win(self) -> None:
+        """
+            Close the application window and stop the MLX event loop.
+        """
         print("Exited with ESC ...")
 
         self.m.mlx_destroy_window(

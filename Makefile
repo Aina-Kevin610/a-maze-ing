@@ -4,49 +4,36 @@ ACTIVATE   = $(VENV)/bin/activate
 PIP        = $(VENV)/bin/pip
 EXEC       = $(VENV)/bin/python
 MAIN       = a_maze_ing.py
-SRC        = a_maze_ing.py parsing.py maze_generator/maze_gen.py render.py
-C          ?= "feat"
+SRC        = a_maze_ing.py parsing.py utils.py render.py render_terminal.py \
+             maze_generator/maze_gen.py maze_generator/utils.py \
+             maze_generator/pattern.py
 FILENAME   = "config.txt"
-WHL        = maze_generator-1.0.0-py3-none-any.whl
 
 run: install
 	$(EXEC) $(MAIN) $(FILENAME)
 
-install: $(VENV)/bin/activate
-
-$(VENV)/bin/activate:
+install:
 	$(PYTHON) -m venv $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install mlx-2.2-py3-none-any.whl
-
-venv: install
-
-
-send:
-	git add .
-	git commit -m "$(C)"
-	git push
-
+	$(PIP) install flake8 mypy
+	$(PIP) install -r requirements.txt
 
 debug: install
 	$(EXEC) -m pdb $(MAIN)
 
 lint: install
-	echo "Running flake8..."
-	flake8 $(SRC)
-	echo "Running mypy..."
-	mypy $(SRC)
+	$(EXEC) -m flake8 $(SRC)
+	$(EXEC) -m mypy --warn-return-any --warn-unused-ignores \
+		--ignore-missing-imports --disallow-untyped-defs \
+		--check-untyped-defs $(SRC)
 
-lint-strict:
-	echo "Running strict linting..."
-	flake8 $(SRC)
-	mypy $(SRC) --strict
-
+lint-strict: install
+	$(EXEC) -m flake8 $(SRC)
+	$(EXEC) -m mypy --strict $(SRC)
 
 build: install
 	$(PIP) install build
 	$(EXEC) -m build --wheel
-	mv dist/$(WHL) .
 
 clean:
 	find . -type f -name "*.pyc" -delete
@@ -55,7 +42,11 @@ clean:
 
 fclean: clean
 	rm -rf $(VENV)
+	rm -rf dist
+	rm -rf build
+	rm -f maze.txt
+	rm -rf mazegen.egg-info
 
 re: fclean install
 
-.PHONY: install run debug lint lint-strict clean fclean re
+.PHONY: install run debug lint lint-strict build clean fclean re
