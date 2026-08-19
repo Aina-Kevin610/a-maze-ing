@@ -1,23 +1,17 @@
-import os
+"""Parsing and validation of the maze configuration file."""
+
 import sys
 import random
 from typing import Any
-from render_terminal import print_box
 
-
-red = "\033[91m"
-green = "\033[92m"
-yellow = "\033[93m"
-bleu = "\033[94m"
-magenta = "\033[95m"
-cyan = "\033[96m"
-reset = "\033[0m"
+from render.tui_utils import print_box, red
 
 
 class ParseError(Exception):
-    """
-    Exception raised when an invalid configuration format or
-    validation error is detected.
+    """Exception raised for an invalid or unvalidated configuration.
+
+    Raised when the configuration file has an invalid format or
+    fails validation.
     """
 
     def __init__(self, msg: str = "Invalid config format!") -> None:
@@ -45,7 +39,7 @@ def read_file(filename: str) -> list[str]:
         with open(filename, "r") as file:
             content = file.read().strip().splitlines()
     except FileNotFoundError:
-        print_box(["Error - File not found!", "failure", red])
+        print_box(("File not found!", "Error", red))
         sys.exit(1)
     return content
 
@@ -137,7 +131,7 @@ def test_len_error(content: list[str]) -> list[tuple[str, str]]:
             tuples.append((split_line[0], split_line[1]))
         return tuples
     except ParseError as error:
-        print_box([f"Error - {error}", "failure", red])
+        print_box((str(error), "Error", red))
         sys.exit(1)
 
 
@@ -191,9 +185,7 @@ def is_valid(final: dict[Any, Any]) -> None:
         ParseError: If any configuration value is invalid.
     """
     algos = [
-        "DFS",
         "hunt_and_kill",
-        "backtracking",
         "prim",
     ]
 
@@ -217,9 +209,14 @@ def is_valid(final: dict[Any, Any]) -> None:
         if "SEED" not in final:
             final["SEED"] = None
 
-        # FIX: SPEED=None si absent, converti plus bas seulement si présent
         if "SPEED" not in final:
             final["SPEED"] = None
+
+        if "BOLD" not in final:
+            final["BOLD"] = "False"
+
+        if "ANIMATION" not in final:
+            final["ANIMATION"] = "False"
 
         width = int(final["WIDTH"])
         height = int(final["HEIGHT"])
@@ -245,13 +242,17 @@ def is_valid(final: dict[Any, Any]) -> None:
                 "PERFECT option must be boolean!"
             )
 
+        if final["ANIMATION"] not in ("True", "False"):
+            raise ParseError(
+                "ANIMATION option must be boolean!"
+            )
+
         if final["ALGO"] not in algos:
             raise ParseError(
                 f"Unknown parameter for ALGO! "
                 f"Algo must be {algos}"
             )
 
-        # FIX: conversion de SPEED uniquement si la valeur est présente
         if final["SPEED"] is not None:
             speed_int = int(final["SPEED"])
             if speed_int < 1:
@@ -282,7 +283,7 @@ def is_valid(final: dict[Any, Any]) -> None:
             )
 
     except (ValueError, ParseError) as error:
-        print_box([f"Error - {error}", "failure", red])
+        print_box((str(error), "Error", red))
         sys.exit(1)
 
 
@@ -317,7 +318,7 @@ def parse_config(
     validated = test_len_error(cleaned)
 
     if len(validated) < 6:
-        print_box(["Error - Missing mandatory parameter!", "failure", red])
+        print_box(("Missing mandatory parameter!", "Error", red))
         sys.exit(1)
 
     as_dict = convert_to_dict(validated)

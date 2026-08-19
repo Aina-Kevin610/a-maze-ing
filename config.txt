@@ -1,10 +1,18 @@
-WIDTH=10
-HEIGHT=10
+# === Mandatory ===
+
+WIDTH=30 #must be >= 3
+HEIGHT=30 #must be >= 3
 ENTRY=1,1
-EXIT=1,9
+EXIT=1,2
 OUTPUT_FILE=maze.txt
-PERFECT=False
-ALGO=prim
-PATTERN=42
-SPEED = 100
-SEED = 1
+PERFECT=True # True or False
+SEED = 12
+
+# === BONUS ===
+#ALGO=hunt_and_kill # (hunt_and_kill or prim)
+#PATTERN=42 # must be uppercase or number
+RENDER = WINDOW #ASCII
+#BOLD = True #or False
+ANIMATION = True #or False
+SPEED = 20
+#LOADING

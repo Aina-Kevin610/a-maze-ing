@@ -1,61 +1,36 @@
+"""Entry point for the a-maze-ing CLI application.
+
+Parses the configuration file given on the command line, generates
+and solves a maze, saves the result, then renders it either in ASCII
+mode or in an interactive MLX window depending on the configuration.
+"""
+
 import sys
-from utils import *
-from render import DrawingMaze
-from maze_generator.maze_gen import Maze
-from render_terminal import print_box
-
-
-def main() -> None:
-    """
-        Initialize and run the maze generator application.
-        This function:
-            - Creates a maze instance.
-            - Displays configuration information.
-            - Creates the graphical renderer.
-            - Starts maze generation.
-            - Registers MLX event hooks.
-            - Launches the graphical event loop.
-        Raises:
-            KeyboardInterrupt: If the program is interrupted by the user.
-            EOFError: If an unexpected end-of-file condition occurs.
-            Exception: For any other unexpected runtime error.
-    """
-    try:
-        maze = Maze(filename=sys.argv[1])
-        mess_menu = [
-            "P          show/hide path",
-            "Enter      regenerate",
-            "Space      change wall color",
-            "ESC        quit",
-        ]
-
-        mess_info = [
-            f"Algorithm  {maze.algo}",
-            f"Size       {maze.width} x {maze.height}",
-            f"Entry      {maze.entry[0]}, {maze.entry[1]}",
-            f"Exit       {maze.exit[0]}, {maze.exit[1]}",
-            f"Speed      {maze.speed}",
-            f"Seed       {maze.seed}",
-            f"Perfect    {maze.perfect}",
-            f"Output     {maze.output_file}",
-        ]
-        draw = DrawingMaze(maze, None, 0xFF000000)
-        loading("Generating maze", 0.08)
-        draw.saved = False
-        draw.m.mlx_loop_hook(draw.mlx, loop_hook, [draw, maze.rand, maze])
-        print_box([mess_menu, "menu", green])
-        print_box([mess_info, "info", cyan])
-        draw.m.mlx_loop(draw.mlx)
-    except KeyboardInterrupt as e:
-        print_box(["Program interupted - ", e, "faillure", yellow])
-        sys.exit(0)
-    except Exception as e:
-        print_box([f"Program interupted - {e}" , "faillure", yellow])
-        sys.exit(0)
-    except BaseException as e:
-        print_box(["Program interupted - ", e, "faillure", yellow])
-        sys.exit(0)
-
+from render.ascii import ascii_render
+from render.window_render import window_render
+from mazegen import Maze
+from render.tui_utils import loading
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python3 a_maze_ing.py <config_file>")
+        sys.exit(1)
+    maze = Maze(sys.argv[1])
+    loading("Generating maze")
+    maze.generate()
+    loading("Solving maze")
+    maze.solve()
+    loading("Saving maze")
+    maze.save(maze.grid)
+    win = False if maze.render == "ASCII" else True
+    if win:
+        window_render(
+            maze.output_file,
+            maze.protected,
+            bold=maze.bold,
+            animation=maze.animation,
+            speed=maze.speed,
+            config_filename=sys.argv[1],
+        )
+    else:
+        ascii_render(maze.output_file, protected=maze.protected)
